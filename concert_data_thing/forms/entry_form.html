@@ -558,10 +558,23 @@
                 if (!result.user_svgs || result.user_svgs.length === 0) {
                     console.error("[displayResults] No user_svgs in result:", result);
                     userGallery.innerHTML = `
-                        <div style="padding: 20px; color: #ff4444; background-color: #2a2a2a; border-radius: 6px;">
+                        <div id="no-user-svgs-message" style="padding: 20px; color: #ff4444; background-color: #2a2a2a; border-radius: 6px;">
                             No overview images available. Please check the console for details.
                         </div>
                     `;
+                    // Scroll to error message if no SVGs
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            const errorMsg = document.getElementById("no-user-svgs-message");
+                            if (errorMsg) {
+                                errorMsg.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start",
+                                    inline: "nearest"
+                                });
+                            }
+                        });
+                    });
                 } else {
                     console.log(`[displayResults] Found ${result.user_svgs.length} user SVG(s)`);
                     // Load all user SVGs
@@ -594,6 +607,9 @@
                             successful.forEach((r, idx) => {
                                 const item = document.createElement("div");
                                 item.className = "gallery-item";
+                                if (idx === 0) {
+                                    item.id = "first-user-svg"; // Mark first item for scrolling
+                                }
                                 const fileName = r.svgPath.split("/").pop();
                                 const displayName = fileName.replace(".svg", "").replace(/^user-high-level/, "Overview");
                                 const downloadUrl = `/api/v1/download/${encodeURIComponent(r.svgPath)}`;
@@ -613,6 +629,25 @@
                                 `;
                                 userGallery.appendChild(item);
                                 console.log(`[displayResults] User SVG ${idx + 1} added to gallery`);
+
+                                // Scroll immediately after first SVG is added
+                                if (idx === 0) {
+                                    // Use requestAnimationFrame to ensure DOM is updated
+                                    requestAnimationFrame(() => {
+                                        requestAnimationFrame(() => {
+                                            // Scroll to user stats container (heading) instead of the SVG
+                                            const userStats = document.getElementById("userStats");
+                                            if (userStats) {
+                                                console.log("[displayResults] Scrolling to user stats container (Your Concert Overview heading)");
+                                                userStats.scrollIntoView({
+                                                    behavior: "smooth",
+                                                    block: "start",
+                                                    inline: "nearest"
+                                                });
+                                            }
+                                        });
+                                    });
+                                }
                             });
                         }
 
@@ -622,6 +657,10 @@
                                 const userSvgUrl = `/api/v1/svg/${encodeURIComponent(r.svgPath)}`;
                                 const item = document.createElement("div");
                                 item.className = "gallery-item";
+                                // If no successful SVGs, mark first fallback for scrolling
+                                if (successful.length === 0 && idx === 0) {
+                                    item.id = "first-user-svg";
+                                }
                                 const fileName = r.svgPath.split("/").pop();
                                 const displayName = fileName.replace(".svg", "").replace(/^user-high-level/, "Overview");
                                 const downloadUrl = `/api/v1/download/${encodeURIComponent(r.svgPath)}`;
@@ -640,6 +679,24 @@
                                     </div>
                                 `;
                                 userGallery.appendChild(item);
+
+                                // Scroll immediately after first fallback is added (if no successful ones)
+                                if (successful.length === 0 && idx === 0) {
+                                    requestAnimationFrame(() => {
+                                        requestAnimationFrame(() => {
+                                            // Scroll to user stats container (heading) instead of the SVG
+                                            const userStats = document.getElementById("userStats");
+                                            if (userStats) {
+                                                console.log("[displayResults] Scrolling to user stats container (fallback)");
+                                                userStats.scrollIntoView({
+                                                    behavior: "smooth",
+                                                    block: "start",
+                                                    inline: "nearest"
+                                                });
+                                            }
+                                        });
+                                    });
+                                }
                             });
                         }
                     }).catch(error => {
@@ -705,10 +762,27 @@
                     console.error("[displayResults] Download all button not found");
                 }
 
-                // Show results
+                // Show results container immediately (before SVGs load) so we can scroll
                 console.log("[displayResults] Showing results container");
-                document.getElementById("resultsContainer").classList.remove("hidden");
-                console.log("[displayResults] Results displayed successfully");
+                const resultsContainer = document.getElementById("resultsContainer");
+                if (resultsContainer) {
+                    resultsContainer.classList.remove("hidden");
+                    // Scroll to user stats section immediately when container becomes visible
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            const userStats = document.getElementById("userStats");
+                            if (userStats) {
+                                console.log("[displayResults] Scrolling to user stats container (Your Concert Overview heading)");
+                                userStats.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start",
+                                    inline: "nearest"
+                                });
+                            }
+                        });
+                    });
+                }
+                console.log("[displayResults] Results container shown, waiting for SVGs to load");
             }
 
             async function createGalleryItem(svgPath, fileName, type) {
