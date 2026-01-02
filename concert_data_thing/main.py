@@ -1,4 +1,5 @@
 import io
+import uuid
 from collections import defaultdict
 from pathlib import Path
 from typing import Callable
@@ -17,6 +18,9 @@ from concert_data_thing.img_processing import TopBandContext
 from concert_data_thing.img_processing import UserAnalysis
 from concert_data_thing.img_processing import VenueContext
 from concert_data_thing.img_processing import VenueSummary
+from concert_data_thing.logger import LOGGING_PROVIDER
+
+logger = LOGGING_PROVIDER.new_logger("concert_data_thing.main")
 
 # Global constants for DataFrame column names
 DATE = "date"
@@ -63,14 +67,19 @@ def parse_concert_csv(
     Returns:
         DataFrame with parsed dates and selected columns
     """
+    logger.debug(f"Parsing CSV with column names: date={date}, artist={artist}, venue={venue}")
     df = pd.read_csv(io.StringIO(csv_content))
 
     # Select only the columns we care about
     columns_to_select = [date, artist, venue, city, country, paid_price, original_price, merch_cost, type, event_name]
     df = df[columns_to_select].copy()
+    logger.debug(f"Selected {len(columns_to_select)} columns, initial row count: {len(df)}")
 
     # Convert date column to datetime with format day.month.year
     df[date] = pd.to_datetime(df[date], format="%d.%m.%y", errors="coerce")
+    invalid_dates = df[date].isna().sum()
+    if invalid_dates > 0:
+        logger.warning(f"Found {invalid_dates} rows with invalid or unparseable dates")
 
     # Convert numeric columns to float (handles empty strings as NaN)
     df[paid_price] = pd.to_numeric(df[paid_price], errors="coerce")
@@ -93,6 +102,7 @@ def parse_concert_csv(
         }
     )
 
+    logger.info(f"Successfully parsed CSV: {len(df)} rows, date range: {df[DATE].min()} to {df[DATE].max()}")
     return df
 
 
@@ -153,9 +163,12 @@ def count_column_occurrences(df: pd.DataFrame, column: str) -> pd.Series:
         Series with value counts, sorted in descending order
     """
     if column not in df.columns:
+        logger.error(f"Column '{column}' not found in DataFrame. Available columns: {list(df.columns)}")
         raise ValueError(f"Column '{column}' not found in DataFrame. Available columns: {list(df.columns)}")
 
-    return df[column].value_counts()
+    counts = df[column].value_counts()
+    logger.debug(f"Counted occurrences for column '{column}': {len(counts)} unique values")
+    return counts
 
 
 def select_rows_by_year(df: pd.DataFrame, year: int, date_column: str = DATE) -> pd.DataFrame:
@@ -170,9 +183,12 @@ def select_rows_by_year(df: pd.DataFrame, year: int, date_column: str = DATE) ->
     Returns:
         DataFrame with only rows where the date_column is in the given year.
     """
+    initial_count = len(df)
     date_series = pd.to_datetime(df[DATE], errors="coerce")
     mask = date_series.dt.year == year
-    return df[mask].reset_index(drop=True)
+    filtered_df = df[mask].reset_index(drop=True)
+    logger.info(f"Filtered by year {year}: {initial_count} rows -> {len(filtered_df)} rows")
+    return filtered_df
 
 
 def analyze_concert_csv_file(csv_path: Path, *args, **kwargs):
@@ -180,9 +196,6 @@ def analyze_concert_csv_file(csv_path: Path, *args, **kwargs):
     See analyze_concert_csv for more details.
     """
     return analyze_concert_csv(csv_path.read_text(), *args, **kwargs)
-
-
-TOP_N_ENTRIES = 4
 
 
 def analyze_concert_csv(
@@ -201,6 +214,7 @@ def analyze_concert_csv(
     type: str = "Typ",
     event_name: str = "Event Name",
     running_order_headline_last: bool = True,
+    request_id: uuid.UUID = "00000000-0000-0000-0000-000000000000",
 ):
     """
     Perform concert CSV analysis, printing artist value counts, unique artists, and grouped day stats.
@@ -222,7 +236,12 @@ def analyze_concert_csv(
         event_name (str): Column name for event name (default: "Event Name").
         running_order_headline_last (bool): If True, order is correct (headline last).
                                            If False, reverse the order (headline first).
+        request_id (uuid.UUID): Request ID for the analysis.
     """
+
+    logger.info(
+        f"Starting analysis for user={user_name}, year={filter_year}, city={city}, running_order_headline_last={running_order_headline_last}, request_id={request_id}"
+    )
     df = parse_concert_csv(
         csv_str,
         date=date,
@@ -239,6 +258,7 @@ def analyze_concert_csv(
 
     # Add QUALIFIED_NAME: EVENT_NAME if present (takes priority), otherwise headliner artist (fallback)
     # First, determine headliner for each date and initialize QUALIFIED_NAME with headliner
+    logger.debug("Determining headliners for each date")
     headliner_by_date = {}
     for date_val, day_df in df.groupby(DATE):
         target_index = -1 if running_order_headline_last else 0
@@ -250,6 +270,9 @@ def analyze_concert_csv(
 
     # Overwrite with EVENT_NAME where EVENT_NAME is not empty
     event_name_mask = df[EVENT_NAME].notna()
+    event_name_count = event_name_mask.sum()
+    if event_name_count > 0:
+        logger.debug(f"Found {event_name_count} rows with event names, using them for QUALIFIED_NAME")
     df.loc[event_name_mask, QUALIFIED_NAME] = df.loc[event_name_mask, EVENT_NAME]
 
     df = select_rows_by_year(df, filter_year)
@@ -260,15 +283,35 @@ def analyze_concert_csv(
     # Group by date and assign a second index from 0..N for each date
     df_indexed["per_day_idx"] = df_indexed.groupby(DATE).cumcount()
     df_indexed = df_indexed.set_index([DATE, "per_day_idx"])
+    unique_dates = len(df_indexed.index.get_level_values(0).unique())
+    logger.info(f"Created indexed DataFrame with {unique_dates} unique dates, {len(df_indexed)} total entries")
 
     meta_info = MetaInfo(user_name=user_name, year=filter_year)
 
-    artist_svgs = create_svgs_for(df_indexed, meta_info, ARTIST, running_order_headline_last)
-    venue_svgs = create_svgs_for(df_indexed, meta_info, VENUE, running_order_headline_last)
+    # TODO: later use coockies to store the request_id (basically reclide uuids)
+    user_data_folder = Path(f"out/user_data_{request_id}")
+    user_data_folder.mkdir(parents=True, exist_ok=True)
 
-    user_svgs = high_level_user_analysis(df_indexed, meta_info, running_order_headline_last)
+    logger.info("Generating artist SVGs")
+    artist_svgs = create_svgs_for(df_indexed, meta_info, ARTIST, running_order_headline_last, user_data_folder)
+    logger.info(f"Generated {len(artist_svgs)} artist SVG files")
 
-    return
+    logger.info("Generating venue SVGs")
+    venue_svgs = create_svgs_for(df_indexed, meta_info, VENUE, running_order_headline_last, user_data_folder)
+    logger.info(f"Generated {len(venue_svgs)} venue SVG files")
+
+    logger.info("Performing high-level user analysis")
+    user_analysis, user_svg_path = high_level_user_analysis(
+        df_indexed, meta_info, running_order_headline_last, user_data_folder
+    )
+    logger.info("Analysis complete")
+
+    return {
+        "request_id": str(request_id),
+        "user_svg": user_svg_path,
+        "artist_svgs": artist_svgs,
+        "venue_svgs": venue_svgs,
+    }
 
 
 def find_most_expensive_ticket(df: DataFrame) -> tuple[float, str]:
@@ -295,6 +338,7 @@ def collect_data_for_user_analysis(df_indexed: DataFrame, running_order_headline
     Handles multi-day festivals by only counting ticket cost once for sequential
     days where TYPE="F" and VENUE is the same.
     """
+    logger.debug("Collecting user-level analysis data")
     # Count unique days with shows
     unique_dates = df_indexed.index.get_level_values(0).unique()
     days_with_show = len(unique_dates)
@@ -378,6 +422,12 @@ def collect_data_for_user_analysis(df_indexed: DataFrame, running_order_headline
     total_venues = len(df_reset[VENUE].dropna().unique())
     total_artists = len(df_reset[ARTIST].dropna().unique())
 
+    logger.info(
+        f"User analysis summary: {days_with_show} days, {sets_seen} sets, "
+        f"€{total_ticket_cost:.2f} total cost, {total_artists} artists, {total_venues} venues, "
+        f"{total_cities} cities, {total_countries} countries"
+    )
+
     return UserAnalysis(
         days_with_show=days_with_show,
         days_with_show_wo_festival=days_with_show_wo_festival,
@@ -402,8 +452,10 @@ def collect_data_for_user_analysis(df_indexed: DataFrame, running_order_headline
 
 
 def high_level_user_analysis(
-    df_indexed: DataFrame, meta_info: MetaInfo, running_order_headline_last: bool
-) -> list[Path]:
+    df_indexed: DataFrame, meta_info: MetaInfo, running_order_headline_last: bool, user_data_folder: Path
+) -> tuple[UserAnalysis, list[Path]]:
+    """Perform high-level user analysis and return the analysis object and SVG path."""
+    logger.debug("Starting high-level user analysis")
     visited_venues = count_column_occurrences(df_indexed, VENUE)
     venues_unique = visited_venues.unique()
     unique_artists = df_indexed[ARTIST].dropna().unique()
@@ -414,8 +466,7 @@ def high_level_user_analysis(
     entries_per_day = df_indexed.groupby(level=0).size()
     entries_per_day = np.log(entries_per_day)
 
-    print(entries_per_day)
-
+    logger.debug(f"Creating calendar visualization for {len(entries_per_day)} days")
     fig, ax = plt.subplots(figsize=(15, 6))
 
     dp.calendar(
@@ -432,8 +483,9 @@ def high_level_user_analysis(
 
     fig.tight_layout()
 
-    map_svg = Path(f"out/map.svg")
+    map_svg = user_data_folder / "map.svg"
     plt.savefig(map_svg)
+    logger.debug(f"Saved calendar map to {map_svg}")
 
     svg_text = UserAnalysis.related_svg_solo_export.read_text()
 
@@ -451,19 +503,24 @@ def high_level_user_analysis(
     svg_text = user_analysis.apply_self_to_text(svg_text)
     svg_text = meta_info.apply_self_to_text(svg_text)
 
-    f = Path("out/map-insert.svg")
-    f.write_text(svg_text)
+    user_svg_path = user_data_folder / "user-high-level.svg"
+    user_svg_path.write_text(svg_text)
+    logger.info(f"Saved high-level user analysis SVG to {user_svg_path}")
+
+    return user_analysis, [user_svg_path]
 
 
 def create_svgs_for(
-    df_indexed: DataFrame, meta_info: MetaInfo, colum: str, running_order_headline_last: bool
+    df_indexed: DataFrame, meta_info: MetaInfo, colum: str, running_order_headline_last: bool, user_data_folder: Path
 ) -> list[Path]:
 
+    logger.debug(f"Creating SVGs for column: {colum}")
     # TODO: smh reliably dedupe concert costs if artists from same night appear on different occasions
     attendance_counts = count_column_occurrences(df_indexed, colum)
     _attendance_unique = attendance_counts.unique()
     _attendance_unique.sort()
-    top_idxes = list(reversed(_attendance_unique.tolist()[-TOP_N_ENTRIES:]))
+    top_idxes = list(reversed(_attendance_unique.tolist()))
+    logger.debug(f"Top {len(top_idxes)} attendance counts for {colum}: {top_idxes}")
 
     svgs = []
 
@@ -472,6 +529,7 @@ def create_svgs_for(
     data_contexts_dict: defaultdict[int, list[MarkerDrivenBaseModel]] = defaultdict(list)
     for i, seen_nr in enumerate(top_idxes, start=1):
         elements = attendance_counts[attendance_counts == seen_nr].index.values
+        logger.debug(f"Processing {len(elements)} elements with {seen_nr} occurrences for {colum}")
         for a in elements:
             ctx = context_collector(
                 df_indexed, a, position_in_ranking=i, running_order_headline_last=running_order_headline_last
@@ -484,6 +542,7 @@ def create_svgs_for(
     # if this is the case we can do the cool single slide overview
     # bc all top numbers only occur once
     if all(map(lambda x: len(x) == 1, data_contexts_dict.values())):
+        logger.debug(f"All top entries are unique for {colum}, creating single overview SVG")
         svg_text = data_contexts_dict[next(iter(data_contexts_dict.keys()))][0].related_svg_unique_top_4.read_text()
 
         svg_text = meta_info.apply_self_to_text(svg_text)
@@ -493,7 +552,9 @@ def create_svgs_for(
             svg_text = element.apply_self_to_text(svg_text)
 
             # TODO unique name & return
-            Path(f"out/top-{colum}.svg").write_text(svg_text)
+            output_path = user_data_folder / f"top-{colum}.svg"
+            output_path.write_text(svg_text)
+            logger.debug(f"Saved overview SVG to {output_path}")
 
     # here we do one aggregate slide and then unique slides for each artist
     # else:
@@ -514,16 +575,19 @@ def create_svgs_for(
     for values in data_contexts_dict.values():
         all_contexts_flat.extend(values)
 
+    logger.debug(f"Generating {len(all_contexts_flat)} solo SVG files for {colum}")
     svg_text_template = all_contexts_flat[0].related_svg_solo_export.read_text()
     svg_text_template = meta_info.apply_self_to_text(svg_text_template)
     context: TopBandContext | VenueContext
     for context in all_contexts_flat:
         svg_text = context.apply_self_to_text(svg_text_template, is_ranked=False)
 
-        f = Path(f"out/solo-{colum}-{context.position}-{context.name}.svg")
-        f.write_text(svg_text)
-        svgs.append(f)
+        output_path = user_data_folder / f"solo-{colum}-{context.position}-{context.name}.svg"
+        output_path.write_text(svg_text)
+        svgs.append(output_path)
+        logger.debug(f"Saved solo SVG: {output_path}")
 
+    logger.info(f"Generated {len(svgs)} SVG files for {colum}")
     return svgs
 
 
@@ -532,6 +596,7 @@ def collect_data_for_venue(
 ) -> VenueContext:
     """Collect venue-related data from the DataFrame to create a VenueContext."""
 
+    logger.debug(f"Collecting data for venue: {venue} (position {position_in_ranking})")
     target_index = -1 if running_order_headline_last else 0
 
     venue_df = df[df[VENUE] == venue]
@@ -557,6 +622,8 @@ def collect_data_for_venue(
         num_bands_per_night.append(num_bands)
         prices.extend(group[PAID_PRICE].unique().tolist())
 
+    logger.debug(f"Venue {venue}: {len(visit_dates)} visits, {len(prices)} price entries")
+
     context = VenueContext(
         position=position_in_ranking,
         name=venue,
@@ -573,6 +640,7 @@ def collect_data_for_artist(
     df: pd.DataFrame, artist: str, *, running_order_headline_last: bool, position_in_ranking: int
 ) -> TopBandContext:
 
+    logger.debug(f"Collecting data for artist: {artist} (position {position_in_ranking})")
     target_index = -1 if running_order_headline_last else 0
 
     # Check for each day if the artist was at the target_index (headliner position) for that day
@@ -614,6 +682,15 @@ def collect_data_for_artist(
     for day, group in artist_df.groupby(level=0):  # level=0 is DATE
         visit_dates.append(day)
         headline_per_night.append(group[QUALIFIED_NAME].iloc[0])
+
+    headline_count = sum(1 for t in headliner_bool_array if t == TopBandContext.TYPE_HEADLINE)
+    festival_count = sum(1 for t in headliner_bool_array if t == TopBandContext.TYPE_FESTIVAL)
+    support_count = sum(1 for t in headliner_bool_array if t == TopBandContext.TYPE_SUPPORT)
+    logger.debug(
+        f"Artist {artist}: {len(visit_dates)} visits ({headline_count} headline, "
+        f"{festival_count} festival, {support_count} support), {len(venues)} venues, "
+        f"{len(countries)} countries, {len(cities)} cities"
+    )
 
     context = TopBandContext(
         position=position_in_ranking,

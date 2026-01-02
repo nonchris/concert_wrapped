@@ -104,6 +104,7 @@ test = ["coverage"]
 # which executes the function `main` from this package when invoked.
 [project.scripts]
 concert-stats = "concert_data_thing.main:main"
+start-concert-api = "concert_data_thing.endpoints:main"
 
 
 # This is configuration specific to the `setuptools` build backend.
