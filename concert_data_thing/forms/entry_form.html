@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concert CSV Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #1db954;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #ffffff;
+        }
+        .required {
+            color: #ff4444;
+        }
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background-color: #2a2a2a;
+            color: #ffffff;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #1db954;
+        }
+        textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: monospace;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            margin-top: 4px;
+        }
+        button {
+            background-color: #1db954;
+            color: #ffffff;
+            border: none;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #1ed760;
+        }
+        button:active {
+            background-color: #1aa34a;
+        }
+        .section {
+            background-color: #2a2a2a;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+        }
+        .section-title {
+            color: #1db954;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Concert CSV Analyzer</h1>
+        <form id="analyzeForm" method="POST" action="/api/v1/analyze-concert">
+            <div class="section">
+                <div class="section-title">Required Fields</div>
+                <div class="form-group">
+                    <label for="csv_str">CSV Content <span class="required">*</span></label>
+                    <textarea id="csv_str" name="csv_str" required placeholder="Paste your CSV content here..."></textarea>
+                    <div class="help-text">Paste the entire CSV content as a string</div>
+                </div>
+                <div class="form-group">
+                    <label for="filter_year">Filter Year <span class="required">*</span></label>
+                    <input type="number" id="filter_year" name="filter_year" required placeholder="2025" min="1900" max="2100">
+                    <div class="help-text">Year to filter the concerts by</div>
+                </div>
+                <div class="form-group">
+                    <label for="user_name">User Name <span class="required">*</span></label>
+                    <input type="text" id="user_name" name="user_name" required placeholder="cyber_chris">
+                    <div class="help-text">User name for the analysis</div>
+                </div>
+                <div class="form-group">
+                    <label for="city">City <span class="required">*</span></label>
+                    <input type="text" id="city" name="city" required placeholder="Berlin">
+                    <div class="help-text">City name for the analysis</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Column Names (Optional)</div>
+                <div class="form-group">
+                    <label for="date">Date Column</label>
+                    <input type="text" id="date" name="date" value="Date" placeholder="Date">
+                </div>
+                <div class="form-group">
+                    <label for="artist">Artist Column</label>
+                    <input type="text" id="artist" name="artist" value="Artist" placeholder="Artist">
+                </div>
+                <div class="form-group">
+                    <label for="venue">Venue Column</label>
+                    <input type="text" id="venue" name="venue" value="Venue" placeholder="Venue">
+                </div>
+                <div class="form-group">
+                    <label for="city_column">City Column</label>
+                    <input type="text" id="city_column" name="city_column" value="City" placeholder="City">
+                </div>
+                <div class="form-group">
+                    <label for="country">Country Column</label>
+                    <input type="text" id="country" name="country" value="Country" placeholder="Country">
+                </div>
+                <div class="form-group">
+                    <label for="paid_price">Paid Price Column</label>
+                    <input type="text" id="paid_price" name="paid_price" value="Bezahlt Preis" placeholder="Bezahlt Preis">
+                </div>
+                <div class="form-group">
+                    <label for="original_price">Original Price Column</label>
+                    <input type="text" id="original_price" name="original_price" value="Preis" placeholder="Preis">
+                </div>
+                <div class="form-group">
+                    <label for="merch_cost">Merch Cost Column</label>
+                    <input type="text" id="merch_cost" name="merch_cost" value="Merch Ausgaben" placeholder="Merch Ausgaben">
+                </div>
+                <div class="form-group">
+                    <label for="type">Type Column</label>
+                    <input type="text" id="type" name="type" value="Typ" placeholder="Typ">
+                </div>
+                <div class="form-group">
+                    <label for="event_name">Event Name Column</label>
+                    <input type="text" id="event_name" name="event_name" value="Event Name" placeholder="Event Name">
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-title">Options</div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="running_order_headline_last" name="running_order_headline_last" checked>
+                        <label for="running_order_headline_last">Running order: headline last</label>
+                    </div>
+                    <div class="help-text">If checked, the order is correct (headline last). If unchecked, reverse the order (headline first).</div>
+                </div>
+            </div>
+            
+            <button type="submit">Analyze Concert Data</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById("analyzeForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                csv_str: formData.get("csv_str"),
+                filter_year: parseInt(formData.get("filter_year")),
+                user_name: formData.get("user_name") || "",
+                city: formData.get("city") || "",
+                date: formData.get("date") || "Date",
+                artist: formData.get("artist") || "Artist",
+                venue: formData.get("venue") || "Venue",
+                city_column: formData.get("city_column") || "City",
+                country: formData.get("country") || "Country",
+                paid_price: formData.get("paid_price") || "Bezahlt Preis",
+                original_price: formData.get("original_price") || "Preis",
+                merch_cost: formData.get("merch_cost") || "Merch Ausgaben",
+                type: formData.get("type") || "Typ",
+                event_name: formData.get("event_name") || "Event Name",
+                running_order_headline_last: formData.get("running_order_headline_last") === "on"
+            };
+            
+            try {
+                const response = await fetch("/api/v1/analyze-concert", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                if (response.ok) {
+                    const html = await response.text();
+                    document.open();
+                    document.write(html);
+                    document.close();
+                } else {
+                    alert("Error: " + response.statusText);
+                }
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

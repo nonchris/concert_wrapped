@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1080"
+   height="1080"
+   viewBox="0 0 1080 1080"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.2 (ebf0e940, 2025-05-08)"
+   sodipodi:docname="many-artists-overview.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#111111"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="1"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="0.67071868"
+     inkscape:cx="389.8803"
+     inkscape:cy="544.19239"
+     inkscape:window-width="1728"
+     inkscape:window-height="1099"
+     inkscape:window-x="699"
+     inkscape:window-y="293"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer3"
+     showguides="true"
+     showgrid="false">
+    <sodipodi:guide
+       position="40.777653,933.50623"
+       orientation="1,0"
+       id="guide4"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="19.218137,1039.9351"
+       orientation="0,-1"
+       id="guide5"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="219.77213,876.17883"
+       orientation="1,0"
+       id="guide6"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="240.00349,1019.0461"
+       orientation="1,0"
+       id="guide7"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="227.60212,876.18133"
+       orientation="0,-1"
+       id="guide8"
+       inkscape:locked="false" />
+    <sodipodi:guide
+       position="254.45323,789.63113"
+       orientation="0,-1"
+       id="guide9"
+       inkscape:locked="false" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1">
+    <rect
+       x="239.02309"
+       y="251.70078"
+       width="722.63195"
+       height="38.668095"
+       id="rect3" />
+    <pattern
+       inkscape:collect="always"
+       xlink:href="#pattern6-7"
+       preserveAspectRatio="xMidYMid"
+       id="pattern7"
+       patternTransform="matrix(0.2389014,0,0,0.2389014,228.0576,249.68718)" />
+    <pattern
+       patternUnits="userSpaceOnUse"
+       width="29"
+       height="20"
+       patternTransform="translate(190,350)"
+       preserveAspectRatio="xMidYMid"
+       style="fill:#000000"
+       id="pattern6-7"
+       inkscape:label=""
+       inkscape:collect="always"
+       inkscape:isstock="true">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-dasharray:none;paint-order:stroke markers fill;stop-color:#000000"
+         d="M 0,5 C 19,5 10,15 29,15"
+         id="path4-2"
+         sodipodi:nodetypes="cc" />
+    </pattern>
+    <linearGradient
+       id="linearGradient3"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop3" />
+      <stop
+         style="stop-color:#0000ff;stop-opacity:1"
+         offset="1"
+         id="stop4" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3"
+       id="linearGradient4"
+       x1="540"
+       y1="0"
+       x2="540"
+       y2="1080"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="BACKGROUND"
+     style="display:inline">
+    <rect
+       style="fill:url(#linearGradient4);fill-opacity:1"
+       id="rect2"
+       width="1080"
+       height="1080"
+       x="0"
+       y="0" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-size:50.4498px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#00ff00;stroke-width:0.525518"
+       x="36.392857"
+       y="78.641258"
+       id="text1"
+       inkscape:label="HEADER"><tspan
+         sodipodi:role="line"
+         id="tspan1"
+         x="36.392857"
+         y="78.641258"
+         style="font-size:50.4498px;text-align:start;text-anchor:start;stroke-width:0.525518">Bands seen &lt;N&gt; times in &lt;YEAR&gt;</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="BAND1">
+    <rect
+       style="display:inline;fill:none;stroke:#ff0808;stroke-width:1.034;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1"
+       width="178.99448"
+       height="171.72528"
+       x="40.777653"
+       y="117.95853"
+       inkscape:label="BAND1-IMG" />
+    <text
+       xml:space="preserve"
+       style="font-size:45.8691px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:url(#pattern7);stroke-width:0.247024;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       x="240.00349"
+       y="203.81866"
+       id="text7"
+       inkscape:label="BAND1-NAME"><tspan
+         sodipodi:role="line"
+         id="tspan7"
+         x="240.00349"
+         y="203.81866"
+         style="fill:#00ff00;stroke:#ff0808;stroke-width:0.247024;stroke-opacity:0">&lt;BANDS&gt;</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-size:26.6667px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:#00ff00;stroke:#ff0808;stroke-width:1.034;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:0"
+       x="239.02309"
+       y="251.70078"
+       id="text9"
+       inkscape:label="BAND1-STATS"><tspan
+         sodipodi:role="line"
+         x="239.02309"
+         y="251.70078"
+         id="tspan10">Total Sets &lt;S&gt;,</tspan></text>
+    <text
+       xml:space="preserve"
+       id="text2"
+       style="fill:#00ff00;text-orientation:auto;font-size:26.66666667px;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3)" />
+  </g>
+</svg>

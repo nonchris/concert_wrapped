@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Statistics - USER_NAME</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #2a2a2a;
+        color: white;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        padding: 40px;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 40px;
+      }
+
+      .username {
+        color: #1db954;
+        font-size: 32px;
+        font-weight: bold;
+      }
+
+      .year {
+        color: white;
+        font-size: 18px;
+      }
+
+      .section {
+        margin-bottom: 50px;
+      }
+
+      .section-title {
+        color: white;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 20px;
+      }
+
+      .top-tracks {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+        position: relative;
+        flex-wrap: nowrap;
+      }
+
+      .track {
+        flex: 1 1 0;
+        min-width: 0;
+        position: relative;
+      }
+
+      .track:nth-child(1) {
+        margin-top: 0;
+        z-index: 3;
+      }
+
+      .track:nth-child(2) {
+        margin-top: 20px;
+        z-index: 2;
+      }
+
+      .track:nth-child(3) {
+        margin-top: 40px;
+        z-index: 1;
+      }
+
+      .album-cover {
+        width: 100%;
+        aspect-ratio: 1;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%);
+      }
+
+      .data-title {
+        color: white;
+        font-size: 16px;
+        font-weight: 500;
+      }
+
+      .top-artists {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .artist {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .artist-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%);
+      }
+
+      .artist-name {
+        color: white;
+        font-size: 18px;
+        font-weight: 500;
+      }
+
+      .characteristics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .characteristic-box {
+        background-color: #1a1a1a;
+        border-radius: 12px;
+        padding: 15px 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .characteristic-percentage {
+        color: #1db954;
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .characteristic-label {
+        color: white;
+        font-size: 16px;
+      }
+
+      .footer {
+        margin-top: 60px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        justify-content: center;
+      }
+
+      .stats-icon {
+        width: 24px;
+        height: 24px;
+        color: #1db954;
+      }
+
+      .stats-link {
+        color: white;
+        font-size: 16px;
+        text-decoration: none;
+      }
+
+      .stats-link:hover {
+        color: #1db954;
+      }
+
+      /* Placeholder images with gradient backgrounds */
+      .album-placeholder-1 {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .album-placeholder-1::before {
+        content: "";
+        position: absolute;
+        top: 20%;
+        left: 30%;
+        width: 40%;
+        height: 60%;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.3) 100%);
+        border-radius: 4px;
+      }
+
+      .album-placeholder-2 {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .album-placeholder-2::before {
+        content: "";
+        position: absolute;
+        top: 20%;
+        left: 30%;
+        width: 40%;
+        height: 60%;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.3) 100%);
+        border-radius: 4px;
+      }
+
+      .album-placeholder-3 {
+        background: linear-gradient(135deg, #2d1b1b 0%, #4a1f1f 50%, #6b2a2a 100%);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .album-placeholder-3::before {
+        content: "";
+        position: absolute;
+        bottom: 20%;
+        left: 20%;
+        width: 60%;
+        height: 40%;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.6) 100%);
+        border-radius: 4px;
+      }
+
+      .artist-logo-1 {
+        background: linear-gradient(135deg, #dc143c 0%, #8b0000 100%);
+        position: relative;
+      }
+
+      .artist-logo-1::before {
+        content: "T";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .artist-logo-1::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 2px;
+        height: 30px;
+        background: white;
+        margin-left: 8px;
+      }
+
+      .artist-logo-2 {
+        background: linear-gradient(135deg, #0066cc 0%, #004499 100%);
+        position: relative;
+      }
+
+      .artist-logo-2::before {
+        content: "K";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #dc143c;
+        font-size: 28px;
+        font-weight: bold;
+      }
+
+      .artist-logo-3 {
+        background: linear-gradient(135deg, #3a3a3a 0%, #1a1a1a 100%);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="username">USER_NAME</div>
+        <div class="year">past 4 weeks</div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">DATA_TYPE</div>
+        <div class="top-tracks">
+          <div class="track">
+            <div class="album-cover album-placeholder-1"></div>
+            <div class="data-title">TOP DATA POINT 1</div>
+          </div>
+          <div class="track">
+            <div class="album-cover album-placeholder-2"></div>
+            <div class="data-title">TOP DATA POINT 2</div>
+          </div>
+          <div class="track">
+            <div class="album-cover album-placeholder-3"></div>
+            <div class="data-title">City TOP DATA POINT 3</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Top Artists</div>
+        <div class="top-artists">
+          <div class="artist">
+            <div class="artist-logo artist-logo-1"></div>
+            <div class="artist-name">Twenty One Pilots</div>
+          </div>
+          <div class="artist">
+            <div class="artist-logo artist-logo-2"></div>
+            <div class="artist-name">Kraftklub</div>
+          </div>
+          <div class="artist">
+            <div class="artist-logo artist-logo-3"></div>
+            <div class="artist-name">VINTA</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="characteristics">
+          <div class="characteristic-box">
+            <span class="characteristic-percentage">78%</span>
+            <span class="characteristic-label">energetic</span>
+          </div>
+          <div class="characteristic-box">
+            <span class="characteristic-percentage">50%</span>
+            <span class="characteristic-label">danceable</span>
+          </div>
+          <div class="characteristic-box">
+            <span class="characteristic-percentage">22%</span>
+            <span class="characteristic-label">lively</span>
+          </div>
+          <div class="characteristic-box">
+            <span class="characteristic-percentage">10%</span>
+            <span class="characteristic-label">acoustic</span>
+          </div>
+          <div class="characteristic-box">
+            <span class="characteristic-percentage">10%</span>
+            <span class="characteristic-label">speechful</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <svg class="stats-icon" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M3 3v18h18v-2H5V3H3zm16 0h-2v14h2V3zm-4 0h-2v10h2V3zM9 3H7v6h2V3z"/>
+        </svg>
+        <a href="https://stats.fm/cyber_chris" class="stats-link">stats.fm/cyber_chris</a>
+      </div>
+    </div>
+  </body>
+</html>
