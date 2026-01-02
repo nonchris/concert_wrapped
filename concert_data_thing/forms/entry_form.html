@@ -10,11 +10,12 @@
             --color-bg-medium: #2a2a2a;
             --color-text-primary: #ffffff;
             --color-text-secondary: #888;
-            --color-primary: #1db954;
-            --color-primary-hover: #1ed760;
-            --color-primary-active: #1aa34a;
+            --color-primary: #ffe600;
+            --color-primary-hover: #fff700;
+            --color-primary-active: #cab200;
             --color-border: #333;
             --color-error: #ff4444;
+            --color-button-text: #000000;
         }
         * {
             margin: 0;
@@ -89,7 +90,7 @@
         }
         button {
             background-color: var(--color-primary);
-            color: var(--color-text-primary);
+            color: var(--color-button-text);
             border: none;
             padding: 14px 32px;
             font-size: 16px;
@@ -172,6 +173,7 @@
         .toggle-btn.active {
             background-color: var(--color-primary);
             border-color: var(--color-primary);
+            color: var(--color-button-text);
         }
         .gallery {
             display: grid;
@@ -271,7 +273,7 @@
         }
         .btn-download {
             background-color: var(--color-primary);
-            color: var(--color-text-primary);
+            color: var(--color-button-text);
             border: none;
             padding: 8px 16px;
             border-radius: 4px;
@@ -295,6 +297,7 @@
         }
         .btn-download-all:hover {
             background-color: var(--color-primary);
+            color: var(--color-button-text);
         }
         .hidden {
             display: none;
