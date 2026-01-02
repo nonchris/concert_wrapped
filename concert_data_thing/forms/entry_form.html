@@ -135,7 +135,7 @@
                     <div class="help-text">City name for the analysis</div>
                 </div>
             </div>
-            
+
             <div class="section">
                 <div class="section-title">Column Names (Optional)</div>
                 <div class="form-group">
@@ -179,7 +179,7 @@
                     <input type="text" id="event_name" name="event_name" value="Event Name" placeholder="Event Name">
                 </div>
             </div>
-            
+
             <div class="section">
                 <div class="section-title">Options</div>
                 <div class="form-group">
@@ -190,14 +190,14 @@
                     <div class="help-text">If checked, the order is correct (headline last). If unchecked, reverse the order (headline first).</div>
                 </div>
             </div>
-            
+
             <button type="submit">Analyze Concert Data</button>
         </form>
     </div>
     <script>
         document.getElementById("analyzeForm").addEventListener("submit", async function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData(e.target);
             const data = {
                 csv_str: formData.get("csv_str"),
@@ -216,7 +216,7 @@
                 event_name: formData.get("event_name") || "Event Name",
                 running_order_headline_last: formData.get("running_order_headline_last") === "on"
             };
-            
+
             try {
                 const response = await fetch("/api/v1/analyze-concert", {
                     method: "POST",
@@ -225,7 +225,7 @@
                     },
                     body: JSON.stringify(data)
                 });
-                
+
                 if (response.ok) {
                     const html = await response.text();
                     document.open();

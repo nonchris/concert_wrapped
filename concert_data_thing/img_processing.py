@@ -1,14 +1,11 @@
-from datetime import datetime
-
-
 import datetime as dt
+from datetime import datetime
 from pathlib import Path
-from typing import ClassVar, Any
-from xml.etree.ElementPath import prepare_parent
+from typing import ClassVar
 
 import numpy as np
-import pandas as pd
-from pydantic import BaseModel, AliasPath
+from pydantic import AliasPath
+from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 
 
@@ -95,8 +92,8 @@ class PriceAble(MarkerDrivenBaseModel):
 
 
 class TopBandContext(PriceAble):
-    TYPE_HEADLINE:  ClassVar[int] = 1
-    TYPE_SUPPORT:  ClassVar[int] = 2
+    TYPE_HEADLINE: ClassVar[int] = 1
+    TYPE_SUPPORT: ClassVar[int] = 2
     TYPE_FESTIVAL: ClassVar[int] = 3
 
     related_svg_unique_top_4: ClassVar[Path] = Path("images/top4bands.svg")
@@ -169,7 +166,6 @@ class TopBandContext(PriceAble):
     def venues_count(self) -> int:
         return len(set(self.venues))
 
-
     # marker_cities: ClassVar[str] = "<TBD>"
     marker_cities_count: ClassVar[str] = "Cix"
     cities: list[str]
@@ -193,6 +189,7 @@ class TopBandContext(PriceAble):
     @property
     def total_headline_cost(self) -> float:
         return self._total_cost(self._get_prices_for_type(self.TYPE_HEADLINE))
+
     @property
     def total_support_cost(self) -> float:
         return self._total_cost(self._get_prices_for_type(self.TYPE_SUPPORT))
@@ -263,6 +260,7 @@ class VenueContext(PriceAble):
     headline_per_night: list[str]
 
     marker_mean_bands_per_night: ClassVar[str] = "Bnx"
+
     @property
     def mean_bands_per_night(self):
         return round(np.mean(self.num_bands_per_night), 2)
@@ -294,8 +292,9 @@ class VenueContext(PriceAble):
 
     @property
     def artist_at_dates_formatted(self):
-        return " - ".join(f"{dt.strftime('%d.%m.%Y')}, {artist}" for dt, artist in zip(self.visit_dates, self.headline_per_night))
-
+        return " - ".join(
+            f"{dt.strftime('%d.%m.%Y')}, {artist}" for dt, artist in zip(self.visit_dates, self.headline_per_night)
+        )
 
 
 class VenueSummary(MarkerDrivenBaseModel):
@@ -328,7 +327,7 @@ class BandSeenSetSummary(MarkerDrivenBaseModel):
 
     times_seen: int = FieldInfo(validation_alias=AliasPath("times"))
 
-    bands: list[TopBandContext]  = FieldInfo(validation_alias=AliasPath("elements"))
+    bands: list[TopBandContext] = FieldInfo(validation_alias=AliasPath("elements"))
 
     marker_total_sets: ClassVar[str] = "S"
 
@@ -340,7 +339,7 @@ class BandSeenSetSummary(MarkerDrivenBaseModel):
 
     @property
     def band_summary(self):
-        return ", ".join((band.name for band in self.bands))
+        return ", ".join(band.name for band in self.bands)
 
 
 class MetaInfo(MarkerDrivenBaseModel):
@@ -362,7 +361,7 @@ class UserAnalysis(MarkerDrivenBaseModel):
     days_with_show_wo_festival: int
 
     marker_days_with_show_festival: ClassVar[str] = "Dsf"
-    
+
     @property
     def days_with_show_festival(self):
         return self.days_with_show - self.days_with_show_wo_festival
@@ -374,7 +373,7 @@ class UserAnalysis(MarkerDrivenBaseModel):
     sets_seen_wo_festival: int
 
     marker_sets_seen_festival: ClassVar[str] = "Sf"
-    
+
     @property
     def sets_seen_festival(self):
         return self.sets_seen - self.sets_seen_wo_festival
@@ -425,10 +424,18 @@ class UserAnalysis(MarkerDrivenBaseModel):
     total_artists: int
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     meta_data = MetaInfo(user_name="cyber_chris", year=2025)
 
-    top_band = TopBandContext(position=1, name="BMTH", classified_sets=[True, False, True], venues=["Palladium", "RIP"], cities=["Köln", "ADW"], countries=["Germany", "Germany"], prices=[98, 121])
+    top_band = TopBandContext(
+        position=1,
+        name="BMTH",
+        classified_sets=[True, False, True],
+        venues=["Palladium", "RIP"],
+        cities=["Köln", "ADW"],
+        countries=["Germany", "Germany"],
+        prices=[98, 121],
+    )
 
     svg = Path("images/drawing.svg")
 

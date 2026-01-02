@@ -1,6 +1,8 @@
 """FastAPI application entry point."""
+
 from contextlib import asynccontextmanager
 from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -19,6 +21,7 @@ async def lifespan(app: FastAPI):
 
 class AnalyzeConcertRequest(BaseModel):
     """Request model for concert CSV analysis."""
+
     csv_str: str
     filter_year: int
     user_name: str
@@ -61,6 +64,7 @@ app = create_app()
 
 entry_point_form = (Path(__file__).parent / "forms" / "entry_form.html").read_text()
 
+
 @app.get("/", response_class=HTMLResponse)
 async def index() -> HTMLResponse:
     """Serve the concert CSV analysis form."""
@@ -71,10 +75,10 @@ async def index() -> HTMLResponse:
 async def analyze_concert_route(request: AnalyzeConcertRequest) -> HTMLResponse:
     """
     Analyze concert CSV data and return HTML statistics page.
-    
+
     Args:
         request: Request body containing CSV string and analysis parameters.
-        
+
     Returns:
         HTMLResponse containing the statistics page.
     """
@@ -96,19 +100,19 @@ async def analyze_concert_route(request: AnalyzeConcertRequest) -> HTMLResponse:
         event_name=request.event_name,
         running_order_headline_last=request.running_order_headline_last,
     )
-    
+
     # Read and return the HTML file
     html_path = Path(__file__).parent / "images" / "test.html"
     html_content = html_path.read_text(encoding="utf-8")
-    
+
     return HTMLResponse(content=html_content)
 
 
 def main():
     """Entry point for CLI."""
     import uvicorn
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
 
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
 
 
 if __name__ == "__main__":
