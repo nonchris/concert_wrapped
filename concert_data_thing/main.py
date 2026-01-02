@@ -39,6 +39,7 @@ QUALIFIED_NAME = "qualified_name"
 def parse_concert_csv(
     csv_content: str,
     date: str = "Date",
+    date_format: str = "%d.%m.%y",
     artist: str = "Artist",
     venue: str = "Venue",
     city: str = "City",
@@ -55,6 +56,7 @@ def parse_concert_csv(
     Args:
         csv_content: Content of the CSV file as a string
         date: Column name for date (default: "Date")
+        date_format: Date format string for parsing (default: "%d.%m.%y")
         artist: Column name for artist (default: "Artist")
         venue: Column name for venue (default: "Venue")
         city: Column name for city (default: "City")
@@ -67,7 +69,7 @@ def parse_concert_csv(
     Returns:
         DataFrame with parsed dates and selected columns
     """
-    logger.debug(f"Parsing CSV with column names: date={date}, artist={artist}, venue={venue}")
+    logger.debug(f"Parsing CSV with column names: date={date}, date_format={date_format}, artist={artist}, venue={venue}")
     df = pd.read_csv(io.StringIO(csv_content))
 
     # Select only the columns we care about
@@ -75,8 +77,8 @@ def parse_concert_csv(
     df = df[columns_to_select].copy()
     logger.debug(f"Selected {len(columns_to_select)} columns, initial row count: {len(df)}")
 
-    # Convert date column to datetime with format day.month.year
-    df[date] = pd.to_datetime(df[date], format="%d.%m.%y", errors="coerce")
+    # Convert date column to datetime with specified format
+    df[date] = pd.to_datetime(df[date], format=date_format, errors="coerce")
     invalid_dates = df[date].isna().sum()
     if invalid_dates > 0:
         logger.warning(f"Found {invalid_dates} rows with invalid or unparseable dates")
@@ -204,6 +206,7 @@ def analyze_concert_csv(
     user_name: str,
     city: str,
     date: str = "Date",
+    date_format: str = "%d.%m.%y",
     artist: str = "Artist",
     venue: str = "Venue",
     city_column: str = "City",
@@ -225,6 +228,7 @@ def analyze_concert_csv(
         user_name (str): User name for the analysis.
         city (str): City name for the analysis.
         date (str): Column name for date (default: "Date").
+        date_format (str): Date format string for parsing (default: "%d.%m.%y").
         artist (str): Column name for artist (default: "Artist").
         venue (str): Column name for venue (default: "Venue").
         city_column (str): Column name for city (default: "City").
@@ -245,6 +249,7 @@ def analyze_concert_csv(
     df = parse_concert_csv(
         csv_str,
         date=date,
+        date_format=date_format,
         artist=artist,
         venue=venue,
         city=city_column,
@@ -480,6 +485,8 @@ def high_level_user_analysis(
         start_date=f"{meta_info.year}-01-01",
         end_date=f"{meta_info.year}-12-31",
         ax=ax,
+        day_kws={"color": "white"},
+        month_kws={"color": "white"},
     )
 
     # Set calendar background to transparent

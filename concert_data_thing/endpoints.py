@@ -34,6 +34,7 @@ class AnalyzeConcertRequest(BaseModel):
     user_name: str
     city: str
     date: str = "Date"
+    date_format: str = "%d.%m.%y"
     artist: str = "Artist"
     venue: str = "Venue"
     city_column: str = "City"
@@ -187,6 +188,7 @@ async def analyze_concert_route(request: AnalyzeConcertRequest) -> AnalyzeConcer
         user_name=request.user_name,
         city=request.city,
         date=request.date,
+        date_format=request.date_format,
         artist=request.artist,
         venue=request.venue,
         city_column=request.city_column,

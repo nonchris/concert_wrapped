@@ -311,25 +311,44 @@
                 <div class="form-group">
                     <label for="csv_str">CSV Content <span class="required">*</span></label>
                     <textarea id="csv_str" name="csv_str" required placeholder="Paste your CSV content here..."></textarea>
-                    <div class="help-text">Paste the entire CSV content as a string</div>
+                    <div class="help-text">
+                        Paste the entire CSV content as a text.<br>
+                        The first row of your data must contain the column names.<br>
+                        It is important that the data you provide is complete for all columns listed below (for the year you want to have analyzed).
+                        Your data may have additional columns, they will not affect the process.<br>
+                        Empty rows are no problem as well.<br><br>
+                        "Comma-Separated Values" is a data format where the values of each row are separated by specific character.<br>
+                        Nearly every spreadsheet editor supports the export of a table as CSV.<br>
+                        You can configure the chosen separator character below under "Options".
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="filter_year">Filter Year <span class="required">*</span></label>
                     <input type="number" id="filter_year" name="filter_year" required placeholder="2025" min="1900" max="2100">
-                    <div class="help-text">Year to filter the concerts by</div>
+                    <div class="help-text">Year you want to generate stats for</div>
                 </div>
                 <div class="form-group">
                     <label for="user_name">User Name <span class="required">*</span></label>
                     <input type="text" id="user_name" name="user_name" required placeholder="cyber_chris">
-                    <div class="help-text">User name for the analysis</div>
+                    <div class="help-text">User name to be displayed.</div>
                 </div>
             </div>
 
             <div class="section">
-                <div class="section-title">Column Names (Optional)</div>
+                <div class="section-title">Column Names (Optional)
+                    <div class="help-text">
+                        Here you declare how the data columns are called in your pasted table.
+                        Not all of these columns are currently used in analysis, but it's required to label them all.
+                </div>
+            </div>
+
                 <div class="form-group">
                     <label for="date">Date Column</label>
-                    <input type="text" id="date" name="date" value="Date" placeholder="Date">
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="date" name="date" value="Date" placeholder="Date" style="flex: 0.5;">
+                        <input type="text" id="date_format" name="date_format" value="%d.%m.%y" placeholder="%d.%m.%y" style="flex: 1;">
+                    </div>
+                    <div class="help-text">Date column name (left, half width) and format string (right). Examples: %d.%m.%y, %Y-%m-%d, %m/%d/%Y</div>
                 </div>
                 <div class="form-group">
                     <label for="artist">Artist Column</label>
@@ -428,6 +447,7 @@
                     user_name: formData.get("user_name") || "",
                     city: "[unset]",
                     date: formData.get("date") || "Date",
+                    date_format: formData.get("date_format") || "%d.%m.%y",
                     artist: formData.get("artist") || "Artist",
                     venue: formData.get("venue") || "Venue",
                     city_column: formData.get("city_column") || "City",
