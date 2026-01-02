@@ -133,7 +133,7 @@ async def download_all_svgs(request_id: str) -> StreamingResponse:
     Returns:
         Zip file containing all SVGs.
     """
-    user_data_folder = Path(__file__).parent.parent / "out" / f"user_data_{request_id}"
+    user_data_folder = Path(__file__).parent / "out" / f"user_data_{request_id}"
     if not user_data_folder.exists():
         raise HTTPException(status_code=404, detail=f"Request data not found: {request_id}")
 
