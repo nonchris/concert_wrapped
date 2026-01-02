@@ -392,12 +392,14 @@
             <div class="view-toggle">
                 <button class="toggle-btn active" data-view="artists" id="toggleArtists">Artists</button>
                 <button class="toggle-btn" data-view="venues" id="toggleVenues">Venues</button>
+                <button class="toggle-btn" data-view="cities" id="toggleCities">Cities</button>
             </div>
 
             <button class="btn-download-all" id="downloadAllBtn">Download All SVGs as ZIP</button>
 
             <div id="galleryArtists" class="gallery"></div>
             <div id="galleryVenues" class="gallery hidden"></div>
+            <div id="galleryCities" class="gallery hidden"></div>
         </div>
 
         <div id="loading" class="loading hidden">Processing your data...</div>
@@ -474,9 +476,10 @@
                         console.log("[submit] JSON parsed successfully");
                         console.log("[submit] Result structure:", {
                             request_id: result.request_id,
-                            user_svg: result.user_svg,
+                            user_svgs_count: result.user_svgs?.length || 0,
                             artist_svgs_count: result.artist_svgs?.length || 0,
                             venue_svgs_count: result.venue_svgs?.length || 0,
+                            city_svgs_count: result.city_svgs?.length || 0,
                         });
                         displayResults(result);
                     } else {
@@ -504,6 +507,7 @@
             console.log("[init] Setting up view toggle buttons");
             const toggleArtistsBtn = document.getElementById("toggleArtists");
             const toggleVenuesBtn = document.getElementById("toggleVenues");
+            const toggleCitiesBtn = document.getElementById("toggleCities");
 
             if (toggleArtistsBtn) {
                 toggleArtistsBtn.addEventListener("click", () => {
@@ -523,27 +527,47 @@
                 console.warn("[init] Toggle venues button not found");
             }
 
+            if (toggleCitiesBtn) {
+                toggleCitiesBtn.addEventListener("click", () => {
+                    console.log("[toggle] Cities button clicked");
+                    switchView("cities");
+                });
+            } else {
+                console.warn("[init] Toggle cities button not found");
+            }
+
             console.log("[init] Initialization complete");
 
             function switchView(view) {
                 console.log(`[switchView] Switching to ${view} view`);
                 const artistsBtn = document.getElementById("toggleArtists");
                 const venuesBtn = document.getElementById("toggleVenues");
+                const citiesBtn = document.getElementById("toggleCities");
                 const artistsGallery = document.getElementById("galleryArtists");
                 const venuesGallery = document.getElementById("galleryVenues");
+                const citiesGallery = document.getElementById("galleryCities");
 
+                // Reset all buttons and galleries
+                artistsBtn.classList.remove("active");
+                venuesBtn.classList.remove("active");
+                citiesBtn.classList.remove("active");
+                artistsGallery.classList.add("hidden");
+                venuesGallery.classList.add("hidden");
+                citiesGallery.classList.add("hidden");
+
+                // Activate selected view
                 if (view === "artists") {
-                    console.log("[switchView] Showing artists, hiding venues");
+                    console.log("[switchView] Showing artists");
                     artistsBtn.classList.add("active");
-                    venuesBtn.classList.remove("active");
                     artistsGallery.classList.remove("hidden");
-                    venuesGallery.classList.add("hidden");
-                } else {
-                    console.log("[switchView] Showing venues, hiding artists");
-                    artistsBtn.classList.remove("active");
+                } else if (view === "venues") {
+                    console.log("[switchView] Showing venues");
                     venuesBtn.classList.add("active");
-                    artistsGallery.classList.add("hidden");
                     venuesGallery.classList.remove("hidden");
+                } else if (view === "cities") {
+                    console.log("[switchView] Showing cities");
+                    citiesBtn.classList.add("active");
+                    citiesGallery.classList.remove("hidden");
                 }
             }
 
@@ -749,6 +773,26 @@
                     });
                 } else {
                     console.warn("[displayResults] No venue SVGs found in result");
+                }
+
+                // Display city gallery
+                console.log("[displayResults] Displaying city gallery, count:", result.city_svgs?.length || 0);
+                const citiesGallery = document.getElementById("galleryCities");
+                citiesGallery.innerHTML = "";
+                if (result.city_svgs && result.city_svgs.length > 0) {
+                    // Use Promise.all to load all SVGs
+                    Promise.all(result.city_svgs.map(async (svgPath, index) => {
+                        console.log(`[displayResults] Adding city SVG ${index + 1}/${result.city_svgs.length}:`, svgPath);
+                        const fileName = svgPath.split("/").pop();
+                        return await createGalleryItem(svgPath, fileName, "city");
+                    })).then(items => {
+                        items.forEach(item => citiesGallery.appendChild(item));
+                        console.log("[displayResults] All city gallery items added");
+                    }).catch(error => {
+                        console.error("[displayResults] Error loading city gallery items:", error);
+                    });
+                } else {
+                    console.warn("[displayResults] No city SVGs found in result");
                 }
 
                 // Set up download all button

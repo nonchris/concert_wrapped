@@ -163,6 +163,7 @@ class AnalyzeConcertResponse(BaseModel):
     user_svgs: list[str]  # List of user SVG paths
     artist_svgs: list[str]
     venue_svgs: list[str]
+    city_svgs: list[str]
 
 
 @app.post("/api/v1/analyze-concert")
@@ -215,6 +216,7 @@ async def analyze_concert_route(request: AnalyzeConcertRequest) -> AnalyzeConcer
         user_svgs=[path_to_api_path(p) for p in result["user_svgs"]],
         artist_svgs=[path_to_api_path(p) for p in result["artist_svgs"]],
         venue_svgs=[path_to_api_path(p) for p in result["venue_svgs"]],
+        city_svgs=[path_to_api_path(p) for p in result["city_svgs"]],
     )
 
 

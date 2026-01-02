@@ -300,6 +300,10 @@ def analyze_concert_csv(
     venue_svgs = create_svgs_for(df_indexed, meta_info, VENUE, running_order_headline_last, user_data_folder)
     logger.info(f"Generated {len(venue_svgs)} venue SVG files")
 
+    logger.info("Generating city SVGs")
+    city_svgs = create_svgs_for(df_indexed, meta_info, CITY, running_order_headline_last, user_data_folder)
+    logger.info(f"Generated {len(venue_svgs)} city SVG files")
+
     logger.info("Performing high-level user analysis")
     user_analysis, user_svg_paths = high_level_user_analysis(
         df_indexed, meta_info, running_order_headline_last, user_data_folder
@@ -311,6 +315,7 @@ def analyze_concert_csv(
         "user_svgs": user_svg_paths,
         "artist_svgs": artist_svgs,
         "venue_svgs": venue_svgs,
+        "city_svgs": city_svgs,
     }
 
 
@@ -511,28 +516,32 @@ def high_level_user_analysis(
 
 
 def create_svgs_for(
-    df_indexed: DataFrame, meta_info: MetaInfo, colum: str, running_order_headline_last: bool, user_data_folder: Path
+    df_indexed: DataFrame, meta_info: MetaInfo, column: str, running_order_headline_last: bool, user_data_folder: Path
 ) -> list[Path]:
 
-    logger.debug(f"Creating SVGs for column: {colum}")
+    logger.debug(f"Creating SVGs for column: {column}")
     # TODO: smh reliably dedupe concert costs if artists from same night appear on different occasions
-    attendance_counts = count_column_occurrences(df_indexed, colum)
+    attendance_counts = count_column_occurrences(df_indexed, column)
     _attendance_unique = attendance_counts.unique()
     _attendance_unique.sort()
     top_idxes = list(reversed(_attendance_unique.tolist()))
-    logger.debug(f"Top {len(top_idxes)} attendance counts for {colum}: {top_idxes}")
+    logger.debug(f"Top {len(top_idxes)} attendance counts for {column}: {top_idxes}")
 
     svgs = []
 
-    context_collector, collection_class = context_collectors[colum]
+    context_collector, collection_class = context_collectors[column]
 
     data_contexts_dict: defaultdict[int, list[MarkerDrivenBaseModel]] = defaultdict(list)
     for i, seen_nr in enumerate(top_idxes, start=1):
         elements = attendance_counts[attendance_counts == seen_nr].index.values
-        logger.debug(f"Processing {len(elements)} elements with {seen_nr} occurrences for {colum}")
+        logger.debug(f"Processing {len(elements)} elements with {seen_nr} occurrences for {column}")
         for a in elements:
             ctx = context_collector(
-                df_indexed, a, position_in_ranking=i, running_order_headline_last=running_order_headline_last
+                df_indexed,
+                a,
+                position_in_ranking=i,
+                running_order_headline_last=running_order_headline_last,
+                column=column,
             )
             data_contexts_dict[seen_nr].append(ctx)
 
@@ -542,7 +551,7 @@ def create_svgs_for(
     # if this is the case we can do the cool single slide overview
     # bc all top numbers only occur once
     if all(map(lambda x: len(x) == 1, data_contexts_dict.values())):
-        logger.debug(f"All top entries are unique for {colum}, creating single overview SVG")
+        logger.debug(f"All top entries are unique for {column}, creating single overview SVG")
         svg_text = data_contexts_dict[next(iter(data_contexts_dict.keys()))][0].related_svg_unique_top_4.read_text()
 
         svg_text = meta_info.apply_self_to_text(svg_text)
@@ -552,7 +561,7 @@ def create_svgs_for(
             svg_text = element.apply_self_to_text(svg_text)
 
             # TODO unique name & return
-            output_path = user_data_folder / f"top-{colum}.svg"
+            output_path = user_data_folder / f"top-{column}.svg"
             output_path.write_text(svg_text)
             logger.debug(f"Saved overview SVG to {output_path}")
 
@@ -575,31 +584,36 @@ def create_svgs_for(
     for values in data_contexts_dict.values():
         all_contexts_flat.extend(values)
 
-    logger.debug(f"Generating {len(all_contexts_flat)} solo SVG files for {colum}")
+    logger.debug(f"Generating {len(all_contexts_flat)} solo SVG files for {column}")
     svg_text_template = all_contexts_flat[0].related_svg_solo_export.read_text()
     svg_text_template = meta_info.apply_self_to_text(svg_text_template)
     context: TopBandContext | VenueContext
     for context in all_contexts_flat:
         svg_text = context.apply_self_to_text(svg_text_template, is_ranked=False)
 
-        output_path = user_data_folder / f"solo-{colum}-{context.position}-{context.name}.svg"
+        output_path = user_data_folder / f"solo-{column}-{context.position}-{context.name}.svg"
         output_path.write_text(svg_text)
         svgs.append(output_path)
         logger.debug(f"Saved solo SVG: {output_path}")
 
-    logger.info(f"Generated {len(svgs)} SVG files for {colum}")
+    logger.info(f"Generated {len(svgs)} SVG files for {column}")
     return svgs
 
 
-def collect_data_for_venue(
-    df: pd.DataFrame, venue: str, *, running_order_headline_last: bool, position_in_ranking: int
+def collect_data_for_venue_like(
+    df: pd.DataFrame,
+    venue: str,
+    *,
+    running_order_headline_last: bool,
+    position_in_ranking: int,
+    column: str = VENUE,
 ) -> VenueContext:
     """Collect venue-related data from the DataFrame to create a VenueContext."""
 
     logger.debug(f"Collecting data for venue: {venue} (position {position_in_ranking})")
     target_index = -1 if running_order_headline_last else 0
 
-    venue_df = df[df[VENUE] == venue]
+    venue_df = df[df[column] == venue]
 
     # Collect all ticket prices for this venue
     prices = venue_df[PAID_PRICE].dropna().tolist()
@@ -611,7 +625,7 @@ def collect_data_for_venue(
     prices = []
 
     for day, group in venue_df.groupby(level=0):  # level=0 is DATE
-        if venue not in group[VENUE].values:
+        if venue not in group[column].values:
             continue
 
         visit_dates.append(day)
@@ -637,7 +651,7 @@ def collect_data_for_venue(
 
 
 def collect_data_for_artist(
-    df: pd.DataFrame, artist: str, *, running_order_headline_last: bool, position_in_ranking: int
+    df: pd.DataFrame, artist: str, *, running_order_headline_last: bool, position_in_ranking: int, column: str = ARTIST
 ) -> TopBandContext:
 
     logger.debug(f"Collecting data for artist: {artist} (position {position_in_ranking})")
@@ -709,7 +723,8 @@ def collect_data_for_artist(
 
 context_collectors: dict[str, tuple[Callable, Callable]] = {
     ARTIST: (collect_data_for_artist, BandSeenSetSummary),
-    VENUE: (collect_data_for_venue, VenueSummary),
+    VENUE: (collect_data_for_venue_like, VenueSummary),
+    CITY: (collect_data_for_venue_like, VenueSummary),
 }
 
 
