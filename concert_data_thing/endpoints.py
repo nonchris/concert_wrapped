@@ -160,7 +160,7 @@ class AnalyzeConcertResponse(BaseModel):
     """Response model for concert analysis."""
 
     request_id: str
-    user_svg: str
+    user_svgs: list[str]  # List of user SVG paths
     artist_svgs: list[str]
     venue_svgs: list[str]
 
@@ -212,7 +212,7 @@ async def analyze_concert_route(request: AnalyzeConcertRequest) -> AnalyzeConcer
 
     return AnalyzeConcertResponse(
         request_id=result["request_id"],
-        user_svg=path_to_api_path(result["user_svg"]),
+        user_svgs=[path_to_api_path(p) for p in result["user_svgs"]],
         artist_svgs=[path_to_api_path(p) for p in result["artist_svgs"]],
         venue_svgs=[path_to_api_path(p) for p in result["venue_svgs"]],
     )

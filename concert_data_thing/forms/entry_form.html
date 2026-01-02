@@ -168,6 +168,18 @@
             gap: 20px;
             margin-bottom: 20px;
         }
+        .gallery-full-width {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .gallery-full-width .gallery-item {
+            max-width: 100%;
+        }
+        .gallery-full-width .svg-container {
+            max-width: 100%;
+        }
         .gallery-item {
             background-color: #2a2a2a;
             border-radius: 8px;
@@ -217,9 +229,7 @@
         }
         .user-overview-container {
             width: 100%;
-            max-width: 800px;
             aspect-ratio: 1 / 1;
-            margin: 0 auto;
             background-color: #1a1a1a;
             border: 1px solid #333;
             border-radius: 6px;
@@ -232,6 +242,9 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+        }
+        .gallery-full-width .gallery-item .svg-container {
+            aspect-ratio: 1 / 1;
         }
         .gallery-item-info {
             padding: 12px;
@@ -371,7 +384,10 @@
         </form>
 
         <div id="resultsContainer" class="results-container hidden">
-            <div class="user-stats" id="userStats"></div>
+            <div class="user-stats" id="userStats">
+                <h2>Your Concert Overview</h2>
+                <div id="galleryUser" class="gallery-full-width"></div>
+            </div>
 
             <div class="view-toggle">
                 <button class="toggle-btn active" data-view="artists" id="toggleArtists">Artists</button>
@@ -534,50 +550,109 @@
             function displayResults(result) {
                 console.log("[displayResults] Starting to display results", result);
 
-                // Display user high-level SVG
+                // Display user SVGs (treat as list)
                 const userStats = document.getElementById("userStats");
-                console.log("[displayResults] User stats container found:", !!userStats);
+                const userGallery = document.getElementById("galleryUser");
+                console.log("[displayResults] User SVGs from result:", result.user_svgs);
 
-                const userSvgUrl = `/api/v1/svg/${encodeURIComponent(result.user_svg)}`;
-                console.log("[displayResults] User SVG URL:", userSvgUrl);
-
-                // Try to load and render SVG inline
-                fetch(userSvgUrl)
-                    .then(response => {
-                        if (response.ok) {
-                            return response.text();
+                if (!result.user_svgs || result.user_svgs.length === 0) {
+                    console.error("[displayResults] No user_svgs in result:", result);
+                    userGallery.innerHTML = `
+                        <div style="padding: 20px; color: #ff4444; background-color: #2a2a2a; border-radius: 6px;">
+                            No overview images available. Please check the console for details.
+                        </div>
+                    `;
+                } else {
+                    console.log(`[displayResults] Found ${result.user_svgs.length} user SVG(s)`);
+                    // Load all user SVGs
+                    Promise.all(result.user_svgs.map(async (svgPath, index) => {
+                        const userSvgUrl = `/api/v1/svg/${encodeURIComponent(svgPath)}`;
+                        console.log(`[displayResults] Loading user SVG ${index + 1}/${result.user_svgs.length}:`, userSvgUrl);
+                        try {
+                            const response = await fetch(userSvgUrl);
+                            if (response.ok) {
+                                const svgText = await response.text();
+                                console.log(`[displayResults] User SVG ${index + 1} fetched successfully, length:`, svgText.length, "chars");
+                                return { index, svgText, svgPath, success: true };
+                            } else {
+                                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                            }
+                        } catch (error) {
+                            console.error(`[displayResults] Failed to fetch user SVG ${index + 1}:`, error);
+                            return { index, svgPath, success: false, error: error.message };
                         }
-                        throw new Error(`HTTP ${response.status}`);
-                    })
-                    .then(svgText => {
-                        console.log("[displayResults] User SVG fetched successfully, rendering inline");
-                        const userStats = document.getElementById("userStats");
-                        userStats.innerHTML = `
-                            <h2>Your Concert Overview</h2>
-                            <div style="margin-top: 20px; text-align: center;">
-                                <div class="user-overview-container">
-                                    ${svgText}
-                                </div>
-                            </div>
-                        `;
-                    })
-                    .catch(error => {
-                        console.warn("[displayResults] Failed to fetch SVG for inline rendering, using img tag:", error);
-                        const userStats = document.getElementById("userStats");
-                        userStats.innerHTML = `
-                            <h2>Your Concert Overview</h2>
-                            <div style="margin-top: 20px; text-align: center;">
-                                <img id="userOverviewImg" src="${userSvgUrl}" alt="User Overview" class="user-overview-img"
-                                     onerror="console.error('[displayResults] Failed to load user SVG:', this.src); this.style.display='none'; this.nextElementSibling.style.display='block';"
-                                     onload="console.log('[displayResults] User SVG loaded successfully:', this.src); this.style.display='block';">
-                                <div style="display: none; color: #ff4444; padding: 20px;">
-                                    Failed to load overview image. <a href="${userSvgUrl}" target="_blank" style="color: #1db954;">Try opening directly</a>
-                                </div>
+                    })).then(results => {
+                        const successful = results.filter(r => r.success);
+                        const failed = results.filter(r => !r.success);
+
+                        console.log(`[displayResults] Loaded ${successful.length}/${results.length} user SVGs successfully`);
+
+                        userGallery.innerHTML = "";
+
+                        if (successful.length > 0) {
+                            // Display all successful SVGs in full-width gallery
+                            successful.forEach((r, idx) => {
+                                const item = document.createElement("div");
+                                item.className = "gallery-item";
+                                const fileName = r.svgPath.split("/").pop();
+                                const displayName = fileName.replace(".svg", "").replace(/^user-high-level/, "Overview");
+                                const downloadUrl = `/api/v1/download/${encodeURIComponent(r.svgPath)}`;
+
+                                item.innerHTML = `
+                                    <div class="svg-container">
+                                        ${r.svgText}
+                                    </div>
+                                    <div class="gallery-item-info">
+                                        <div class="gallery-item-name">${displayName}</div>
+                                        <div class="gallery-item-actions">
+                                            <button class="btn-download" onclick="console.log('[displayResults] Download clicked:', '${downloadUrl}'); window.location.href='${downloadUrl}'">
+                                                Download
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                userGallery.appendChild(item);
+                                console.log(`[displayResults] User SVG ${idx + 1} added to gallery`);
+                            });
+                        }
+
+                        // Add fallback for failed SVGs
+                        if (failed.length > 0) {
+                            failed.forEach((r, idx) => {
+                                const userSvgUrl = `/api/v1/svg/${encodeURIComponent(r.svgPath)}`;
+                                const item = document.createElement("div");
+                                item.className = "gallery-item";
+                                const fileName = r.svgPath.split("/").pop();
+                                const displayName = fileName.replace(".svg", "").replace(/^user-high-level/, "Overview");
+                                const downloadUrl = `/api/v1/download/${encodeURIComponent(r.svgPath)}`;
+
+                                item.innerHTML = `
+                                    <img src="${userSvgUrl}" alt="${displayName}" class="user-overview-img"
+                                         onerror="console.error('[displayResults] Failed to load user SVG via img tag:', this.src);"
+                                         onload="console.log('[displayResults] User SVG loaded via img tag:', this.src);">
+                                    <div class="gallery-item-info">
+                                        <div class="gallery-item-name">${displayName}</div>
+                                        <div class="gallery-item-actions">
+                                            <button class="btn-download" onclick="console.log('[displayResults] Download clicked:', '${downloadUrl}'); window.location.href='${downloadUrl}'">
+                                                Download
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                                userGallery.appendChild(item);
+                            });
+                        }
+                    }).catch(error => {
+                        console.error("[displayResults] Error loading user SVGs:", error);
+                        userGallery.innerHTML = `
+                            <div style="padding: 20px; color: #ff4444; background-color: #2a2a2a; border-radius: 6px;">
+                                Error loading overview images: ${error.message}
                             </div>
                         `;
                     });
+                }
 
-                console.log("[displayResults] User SVG set:", result.user_svg);
+                console.log("[displayResults] User SVGs processing initiated");
 
                 // Display artist gallery
                 console.log("[displayResults] Displaying artist gallery, count:", result.artist_svgs?.length || 0);

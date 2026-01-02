@@ -301,14 +301,14 @@ def analyze_concert_csv(
     logger.info(f"Generated {len(venue_svgs)} venue SVG files")
 
     logger.info("Performing high-level user analysis")
-    user_analysis, user_svg_path = high_level_user_analysis(
+    user_analysis, user_svg_paths = high_level_user_analysis(
         df_indexed, meta_info, running_order_headline_last, user_data_folder
     )
     logger.info("Analysis complete")
 
     return {
         "request_id": str(request_id),
-        "user_svg": user_svg_path,
+        "user_svgs": user_svg_paths,
         "artist_svgs": artist_svgs,
         "venue_svgs": venue_svgs,
     }
