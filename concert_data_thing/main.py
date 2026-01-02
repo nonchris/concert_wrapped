@@ -40,6 +40,7 @@ def parse_concert_csv(
     csv_content: str,
     date: str = "Date",
     date_format: str = "%d.%m.%y",
+    sep: str = ",",
     artist: str = "Artist",
     venue: str = "Venue",
     city: str = "City",
@@ -57,6 +58,7 @@ def parse_concert_csv(
         csv_content: Content of the CSV file as a string
         date: Column name for date (default: "Date")
         date_format: Date format string for parsing (default: "%d.%m.%y")
+        sep: CSV separator character (default: ",")
         artist: Column name for artist (default: "Artist")
         venue: Column name for venue (default: "Venue")
         city: Column name for city (default: "City")
@@ -69,8 +71,10 @@ def parse_concert_csv(
     Returns:
         DataFrame with parsed dates and selected columns
     """
-    logger.debug(f"Parsing CSV with column names: date={date}, date_format={date_format}, artist={artist}, venue={venue}")
-    df = pd.read_csv(io.StringIO(csv_content))
+    logger.debug(
+        f"Parsing CSV with column names: date={date}, date_format={date_format}, sep={sep}, artist={artist}, venue={venue}"
+    )
+    df = pd.read_csv(io.StringIO(csv_content), sep=sep)
 
     # Select only the columns we care about
     columns_to_select = [date, artist, venue, city, country, paid_price, original_price, merch_cost, type, event_name]
@@ -207,6 +211,7 @@ def analyze_concert_csv(
     city: str,
     date: str = "Date",
     date_format: str = "%d.%m.%y",
+    sep: str = ",",
     artist: str = "Artist",
     venue: str = "Venue",
     city_column: str = "City",
@@ -229,6 +234,7 @@ def analyze_concert_csv(
         city (str): City name for the analysis.
         date (str): Column name for date (default: "Date").
         date_format (str): Date format string for parsing (default: "%d.%m.%y").
+        sep (str): CSV separator character (default: ",").
         artist (str): Column name for artist (default: "Artist").
         venue (str): Column name for venue (default: "Venue").
         city_column (str): Column name for city (default: "City").
@@ -250,6 +256,7 @@ def analyze_concert_csv(
         csv_str,
         date=date,
         date_format=date_format,
+        sep=sep,
         artist=artist,
         venue=venue,
         city=city_column,

@@ -391,6 +391,11 @@
             <div class="section">
                 <div class="section-title">Options</div>
                 <div class="form-group">
+                    <label for="sep">CSV Separator</label>
+                    <input type="text" id="sep" name="sep" value="," placeholder="," style="width: 80px;">
+                    <div class="help-text">Character used to separate values in your CSV. Common values: "," (comma), ";" (semicolon), "\t" (tab - enter as two characters: backslash and t)</div>
+                </div>
+                <div class="form-group">
                     <div class="checkbox-group">
                         <input type="checkbox" id="running_order_headline_last" name="running_order_headline_last" checked>
                         <label for="running_order_headline_last">Running order: headline last</label>
@@ -448,6 +453,14 @@
                     city: "[unset]",
                     date: formData.get("date") || "Date",
                     date_format: formData.get("date_format") || "%d.%m.%y",
+                    sep: (() => {
+                        const sepValue = formData.get("sep") || ",";
+                        // Handle special case: "\t" string should become actual tab character
+                        if (sepValue === "\\t") {
+                            return "\t";
+                        }
+                        return sepValue;
+                    })(),
                     artist: formData.get("artist") || "Artist",
                     venue: formData.get("venue") || "Venue",
                     city_column: formData.get("city_column") || "City",
