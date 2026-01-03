@@ -1,3 +1,4 @@
+import datetime
 import io
 import os
 import uuid
@@ -98,9 +99,9 @@ def parse_concert_csv(
         logger.warning(f"Found {invalid_dates} rows with invalid or unparseable dates")
 
     # Convert numeric columns to float (handles empty strings as NaN)
-    df[paid_price] = pd.to_numeric(df[paid_price], errors="coerce")
-    df[original_price] = pd.to_numeric(df[original_price], errors="coerce")
-    df[merch_cost] = pd.to_numeric(df[merch_cost], errors="coerce")
+    df[paid_price] = pd.to_numeric(df[paid_price], errors="coerce").fillna(0.0)
+    df[original_price] = pd.to_numeric(df[original_price], errors="coerce").fillna(0.0)
+    df[merch_cost] = pd.to_numeric(df[merch_cost], errors="coerce").fillna(0.0)
 
     # Rename columns to internal names for consistency
     df = df.rename(
@@ -753,27 +754,13 @@ def collect_data_for_artist(
     target_index = -1 if running_order_headline_last else 0
 
     # Check for each day if the artist was at the target_index (headliner position) for that day
-    headliner_for_day = []
+    show_classification_per_date = get_concert_types_for_artist(
+        artist, df, festival_label, headline_label, target_index
+    )
 
-    for day, group in df.groupby(level=0):  # level=0 is DATE
+    show_classification_per_date = pd.DataFrame(show_classification_per_date, columns=[DATE, "is_headliner"])
 
-        if artist not in group[ARTIST].values:
-            continue
-
-        # Check festival first (always uses TYPE column)
-        type_value = group[TYPE].iloc[0]
-        if type_value == festival_label:
-            headliner_for_day.append((day, TopBandContext.TYPE_FESTIVAL))
-        # Check headline: either by running order (if "auto") or by TYPE column value
-        elif (type_value == headline_label and headline_label != "auto") or group.iloc[target_index][ARTIST] == artist:
-            headliner_for_day.append((day, TopBandContext.TYPE_HEADLINE))
-        else:
-            # Default to support if neither headline nor support label matched
-            headliner_for_day.append((day, TopBandContext.TYPE_SUPPORT))
-
-    headliner_for_day = pd.DataFrame(headliner_for_day, columns=[DATE, "is_headliner"])
-
-    headliner_bool_array = headliner_for_day["is_headliner"].to_numpy(dtype=int).tolist()
+    headliner_bool_array = show_classification_per_date["is_headliner"].to_numpy(dtype=int).tolist()
 
     artist_df = df[df[ARTIST] == artist]
 
@@ -817,6 +804,32 @@ def collect_data_for_artist(
     )
 
     return context
+
+
+def get_concert_types_for_artist(
+    artist: str, df: DataFrame, festival_label: str, headline_label: str, target_index: int
+) -> list[tuple[datetime.datetime, int]]:
+
+    headliner_for_day = []
+
+    for day, group in df.groupby(level=0):  # level=0 is DATE
+
+        if artist not in group[ARTIST].values:
+            continue
+
+        # Check festival first (always uses TYPE column)
+        type_value = group.loc[group[ARTIST] == artist, TYPE].iloc[0]
+
+        if type_value == festival_label:
+            headliner_for_day.append((day, TopBandContext.TYPE_FESTIVAL))
+        # Check headline: either by running order (if "auto") or by TYPE column value
+        elif (type_value == headline_label and headline_label != "auto") or group.iloc[target_index][ARTIST] == artist:
+            headliner_for_day.append((day, TopBandContext.TYPE_HEADLINE))
+        else:
+            # Default to support if neither headline nor support label matched
+            headliner_for_day.append((day, TopBandContext.TYPE_SUPPORT))
+
+    return headliner_for_day
 
 
 context_collectors: dict[str, tuple[Callable, Callable]] = {
