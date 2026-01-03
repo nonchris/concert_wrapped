@@ -13,7 +13,7 @@
             --color-primary: #ffe600;
             --color-primary-hover: #fff700;
             --color-primary-active: #cab200;
-            --color-border: #333;
+            --color-border: #474747;
             --color-error: #ff4444;
             --color-button-text: #000000;
         }
@@ -331,7 +331,8 @@
                         The first row of your data must contain the column names.<br>
                         It is important that the data you provide is complete for all columns listed below (for the year you want to have analyzed).<br>
                         Your data may have additional columns, they will not affect the process.<br>
-                        Empty rows are no problem as well.<br><br>
+                        Empty rows are no problem as well.
+                        <br><br>
                         "Comma-Separated Values" is a data format where the values of each row are separated by specific character.<br>
                         Nearly every spreadsheet editor supports the export of a table as CSV.<br>
                         You can configure the chosen separator character below under "Options".
@@ -363,7 +364,7 @@
                         <input type="text" id="date" name="date" value="Date" placeholder="Date" style="flex: 0.5;">
                         <input type="text" id="date_format" name="date_format" value="%d.%m.%y" placeholder="%d.%m.%y" style="flex: 1;">
                     </div>
-                    <div class="help-text">Date column name (left, half width) and format string (right). Examples: %d.%m.%y, %Y-%m-%d, %m/%d/%Y</div>
+                    <div class="help-text">Date column name (left) and how to interpret date format (right). Examples: %d.%m.%y, %Y-%m-%d, %m/%d/%Y</div>
                 </div>
                 <div class="form-group">
                     <label for="artist">Artist Column</label>
@@ -386,20 +387,50 @@
                     <input type="text" id="paid_price" name="paid_price" value="Bezahlt Preis" placeholder="Bezahlt Preis">
                 </div>
                 <div class="form-group">
-                    <label for="original_price">Original Price Column</label>
-                    <input type="text" id="original_price" name="original_price" value="Preis" placeholder="Preis">
-                </div>
-                <div class="form-group">
-                    <label for="merch_cost">Merch Cost Column</label>
-                    <input type="text" id="merch_cost" name="merch_cost" value="Merch Ausgaben" placeholder="Merch Ausgaben">
-                </div>
-                <div class="form-group">
                     <label for="type">Type Column</label>
                     <input type="text" id="type" name="type" value="Typ" placeholder="Typ">
+                    <div class="help-text">
+                        Column labeling what type of show a row is (headline, support, festival).<br>
+                        There are two modes available to detect whether an entry is a headline, support show:<br>
+                        Order the rows (per date) in a way that the headliner is always the first or last entry and declare type binary (festival, not festival).<br>
+                        Provide a more sophisticated column to declare it using three labels instead of two ('franka-style').
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <div style="flex: 1;">
+                            <label for="festival_label" style="font-size: 12px; color: var(--color-text-secondary);">Festival Label <span class="required">*</span></label>
+                            <input type="text" id="festival_label" name="festival_label" value="F" placeholder="F" required style="margin-top: 4px;">
+                            <div class="help-text" style="font-size: 11px; margin-top: 2px;">Required: value in Type column for festivals</div>
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="headline_label" style="font-size: 12px; color: var(--color-text-secondary);">Headline Label</label>
+                            <input type="text" id="headline_label" name="headline_label" value="auto" placeholder="auto" style="margin-top: 4px;">
+                            <div class="help-text" style="font-size: 11px; margin-top: 2px;">"auto" = detect by running order, or enter value</div>
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="support_label" style="font-size: 12px; color: var(--color-text-secondary);">Support Label</label>
+                            <input type="text" id="support_label" name="support_label" value="auto" placeholder="auto" style="margin-top: 4px;">
+                            <div class="help-text" style="font-size: 11px; margin-top: 2px;">"auto" = detect by running order, or enter value</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="event_name">Event Name Column</label>
                     <input type="text" id="event_name" name="event_name" value="Event Name" placeholder="Event Name">
+                    <div class="help-text">
+                        This column is used to give events a label that overwrites the name of the headline band.<br>
+                        You may wanna use it for festivals or if you want to give a tour a certain name.<br>
+                        It may be partially empty, it's just important that all events that are labeled are labeld the same in all rows.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="original_price">Original Price Column</label>
+                    <input type="text" id="original_price" name="original_price" value="Preis" placeholder="Preis">
+                    <div class="help-text">Currently unused, may be (partially) empty - just declare that it is present.</div>
+                </div>
+                <div class="form-group">
+                    <label for="merch_cost">Merch Cost Column</label>
+                    <input type="text" id="merch_cost" name="merch_cost" value="Merch Ausgaben" placeholder="Merch Ausgaben">
+                    <div class="help-text">Currently unused, may be (partially) empty - just declare that it is present.</div>
                 </div>
             </div>
 
@@ -415,7 +446,7 @@
                         <input type="checkbox" id="running_order_headline_last" name="running_order_headline_last" checked>
                         <label for="running_order_headline_last">Running order: headline last</label>
                     </div>
-                    <div class="help-text">If checked, the order is correct (headline last). If unchecked, reverse the order (headline first).</div>
+                    <div class="help-text">If checked, the order is correct (headline last). If unchecked, reverse the order (headline first). No effect if labeled 'franka-style'.</div>
                 </div>
             </div>
 
@@ -484,6 +515,9 @@
                     original_price: formData.get("original_price") || "Preis",
                     merch_cost: formData.get("merch_cost") || "Merch Ausgaben",
                     type: formData.get("type") || "Typ",
+                    headline_label: formData.get("headline_label") || "auto",
+                    support_label: formData.get("support_label") || "auto",
+                    festival_label: formData.get("festival_label") || "F",
                     event_name: formData.get("event_name") || "Event Name",
                     running_order_headline_last: formData.get("running_order_headline_last") === "on"
                 };
