@@ -61,7 +61,7 @@ class PriceAble(MarkerDrivenBaseModel):
 
     @staticmethod
     def _total_cost(prices: list[float]):
-        return sum(prices)
+        return round(sum(prices), 2)
 
     marker_mean_ticket_cost: ClassVar[str] = "Mcx"
 
@@ -81,7 +81,7 @@ class PriceAble(MarkerDrivenBaseModel):
 
     @staticmethod
     def _most_expensive_ticket(prices: list[float]) -> float:
-        return max(prices) if prices else float("nan")
+        return round(max(prices), 2) if prices else float("nan")
 
     marker_most_cheap_ticket: ClassVar[str] = "Ccx"
 
@@ -91,7 +91,7 @@ class PriceAble(MarkerDrivenBaseModel):
 
     @staticmethod
     def _most_cheap_ticket(prices: list[float]) -> float:
-        return min(prices) if prices else float("nan")
+        return round(min(prices), 2) if prices else float("nan")
 
 
 class TopBandContext(PriceAble):
