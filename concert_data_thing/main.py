@@ -1,4 +1,5 @@
 import io
+import os
 import uuid
 from collections import defaultdict
 from pathlib import Path
@@ -307,7 +308,8 @@ def analyze_concert_csv(
     meta_info = MetaInfo(user_name=user_name, year=filter_year)
 
     # TODO: later use coockies to store the request_id (basically reclide uuids)
-    user_data_folder = Path(f"out/user_data_{request_id}")
+    ARTIFACTS_PATH = os.environ.get("ARTIFACTS_PATH", "out")
+    user_data_folder = Path(f"{ARTIFACTS_PATH}/user_data_{request_id}")
     user_data_folder.mkdir(parents=True, exist_ok=True)
 
     logger.info("Generating artist SVGs")

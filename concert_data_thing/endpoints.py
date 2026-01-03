@@ -161,6 +161,13 @@ async def index() -> HTMLResponse:
     return HTMLResponse(content=entry_point_form)
 
 
+@app.get("/favicon.png")
+async def favicon() -> FileResponse:
+    """Serve the favicon."""
+    favicon_path = Path(__file__).parent / "forms" / "favicon.png"
+    return FileResponse(favicon_path)
+
+
 class AnalyzeConcertResponse(BaseModel):
     """Response model for concert analysis."""
 
