@@ -95,9 +95,9 @@ test = ["coverage"]
 # maintainers, and where to support the project financially. The key is
 # what's used to render the link text on PyPI.
 [project.urls]
-"Homepage" = "https://github.com/nonchris/concert_stats"
-"Bug Reports" = "https://github.com/nonchris/concert_stats/issues"
-"Source" = "https://github.com/nonchris/concert_stats"
+"Homepage" = "https://github.com/nonchris/concert_data_thing"
+"Bug Reports" = "https://github.com/nonchris/concert_data_thing/issues"
+"Source" = "https://github.com/nonchris/concert_data_thing"
 
 # The following would provide a command line executable called `sample`
 # which executes the function `main` from this package when invoked.
@@ -113,6 +113,9 @@ start-concert-api = "concert_data_thing.endpoints:main"
 # installed, specify them here.
 # package-data = { "sample" = ["*.dat"] }
 include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["concert_data_thing*"]
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
