@@ -9,6 +9,7 @@ from typing import Dict
 import dayplot as dp
 import numpy as np
 import pandas as pd
+from fastapi import HTTPException
 from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from pandas import DataFrame
@@ -81,7 +82,13 @@ def parse_concert_csv(
 
     # Select only the columns we care about
     columns_to_select = [date, artist, venue, city, country, paid_price, original_price, merch_cost, type, event_name]
-    df = df[columns_to_select].copy()
+    try:
+        df = df[columns_to_select].copy()
+    except KeyError as e:
+        raise HTTPException(
+            400,
+            f"Seems like some of your provided column names are wrong. Are you sure you included the header line in the text? - Specific error: {e}",
+        )
     logger.debug(f"Selected {len(columns_to_select)} columns, initial row count: {len(df)}")
 
     # Convert date column to datetime with specified format
