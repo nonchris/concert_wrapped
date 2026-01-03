@@ -1,21 +1,71 @@
 """FastAPI application entry point."""
 
 import io
+import os
 import uuid
 import zipfile
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from fastapi import Depends
 from fastapi import FastAPI
 from fastapi import HTTPException
+from fastapi import status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.responses import Response
 from fastapi.responses import StreamingResponse
+from fastapi.security import HTTPBasic
+from fastapi.security import HTTPBasicCredentials
 from pydantic import BaseModel
 
+from concert_data_thing.logger import LOGGING_PROVIDER
 from concert_data_thing.main import analyze_concert_csv
+
+logger = LOGGING_PROVIDER.new_logger("concert_data_thing.endpoints")
+
+# Basic Auth configuration from environment variables
+BASIC_AUTH_USERNAME = os.getenv("BASIC_AUTH_USERNAME", None)
+BASIC_AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD", None)
+BASIC_AUTH_ENABLED = bool(BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD)
+
+# FastAPI security scheme
+if BASIC_AUTH_ENABLED:
+    security = HTTPBasic()
+    logger.info(f"Basic auth is enabled, username: {BASIC_AUTH_USERNAME}, password: {'*' * len(BASIC_AUTH_PASSWORD)}")
+else:
+    security = lambda: True
+    logger.warning("!!! Basic auth is disabled !!!")
+
+
+def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)) -> HTTPBasicCredentials:
+    """
+    Verify basic auth credentials.
+
+    Args:
+        credentials: HTTP basic auth credentials from request.
+
+    Returns:
+        Credentials if valid.
+
+    Raises:
+        HTTPException: If authentication is enabled and credentials are invalid.
+    """
+    if not BASIC_AUTH_ENABLED:
+        return credentials
+
+    is_correct_username = credentials.username == BASIC_AUTH_USERNAME
+    is_correct_password = credentials.password == BASIC_AUTH_PASSWORD
+
+    if not (is_correct_username and is_correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+
+    return credentials
 
 
 @asynccontextmanager
@@ -88,7 +138,7 @@ def get_svg_path(relative_path: str) -> Path:
 
 
 @app.get("/api/v1/svg/{file_path:path}")
-async def get_svg(file_path: str) -> Response:
+async def get_svg(file_path: str, credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> Response:
     """
     Serve an SVG file.
 
@@ -107,7 +157,7 @@ async def get_svg(file_path: str) -> Response:
 
 
 @app.get("/api/v1/download/{file_path:path}")
-async def download_svg(file_path: str) -> Response:
+async def download_svg(file_path: str, credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> Response:
     """
     Download an SVG file.
 
@@ -126,7 +176,9 @@ async def download_svg(file_path: str) -> Response:
 
 
 @app.get("/api/v1/download-all/{request_id}")
-async def download_all_svgs(request_id: str) -> StreamingResponse:
+async def download_all_svgs(
+    request_id: str, credentials: HTTPBasicCredentials = Depends(verify_credentials)
+) -> StreamingResponse:
     """
     Download all SVGs for a request as a zip file.
 
@@ -156,7 +208,7 @@ async def download_all_svgs(request_id: str) -> StreamingResponse:
 
 
 @app.get("/", response_class=HTMLResponse)
-async def index() -> HTMLResponse:
+async def index(credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> HTMLResponse:
     """Serve the concert CSV analysis form."""
     return HTMLResponse(content=entry_point_form)
 
@@ -166,6 +218,12 @@ async def favicon() -> FileResponse:
     """Serve the favicon."""
     favicon_path = Path(__file__).parent / "forms" / "favicon.png"
     return FileResponse(favicon_path)
+
+
+@app.get("/health")
+async def health() -> dict[str, str]:
+    """Health check endpoint (no auth required)."""
+    return {"status": "healthy"}
 
 
 class AnalyzeConcertResponse(BaseModel):
@@ -179,7 +237,9 @@ class AnalyzeConcertResponse(BaseModel):
 
 
 @app.post("/api/v1/analyze-concert")
-async def analyze_concert_route(request: AnalyzeConcertRequest) -> AnalyzeConcertResponse:
+async def analyze_concert_route(
+    request: AnalyzeConcertRequest, credentials: HTTPBasicCredentials = Depends(verify_credentials)
+) -> AnalyzeConcertResponse:
     """
     Analyze concert CSV data and return JSON with SVG paths.
 
