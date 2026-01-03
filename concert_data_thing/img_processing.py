@@ -1,5 +1,4 @@
 import datetime as dt
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import ClassVar
@@ -10,7 +9,7 @@ from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 
 # get folder of this file
-images_path = os.path.dirname(os.path.realpath(__file__)) + "/images"
+images_path = Path(__file__).resolve().parent / "images"
 
 
 class MarkerDrivenBaseModel(BaseModel):
@@ -100,9 +99,9 @@ class TopBandContext(PriceAble):
     TYPE_SUPPORT: ClassVar[int] = 2
     TYPE_FESTIVAL: ClassVar[int] = 3
 
-    related_svg_unique_top_4: ClassVar[Path] = images_path + "/top4bands.svg"
+    related_svg_unique_top_4: ClassVar[Path] = images_path / "top4bands.svg"
 
-    related_svg_solo_export: ClassVar[Path] = images_path + "/one-artist.svg"
+    related_svg_solo_export: ClassVar[Path] = images_path / "one-artist.svg"
 
     def key(self):
         return self.headline_shows_count, self.total_cost
@@ -233,8 +232,8 @@ class TopBandContext(PriceAble):
 
 
 class VenueContext(PriceAble):
-    related_svg_unique_top_4 = Path("images/top4venues.svg")
-    related_svg_solo_export: ClassVar[Path] = Path("images/one-venue.svg")
+    related_svg_unique_top_4 = images_path / "top4venues.svg"
+    related_svg_solo_export: ClassVar[Path] = images_path / "one-venue.svg"
 
     def key(self):
         return self.total_visits, self.total_sets, self.total_cost
@@ -302,7 +301,7 @@ class VenueContext(PriceAble):
 
 
 class VenueSummary(MarkerDrivenBaseModel):
-    related_svg_summary: ClassVar[Path] = Path("venue-multi-slide.svg")
+    related_svg_summary: ClassVar[Path] = images_path / "venue-multi-slide.svg"
 
     marker_times_visited: ClassVar[str] = "N"
 
@@ -325,7 +324,7 @@ class VenueSummary(MarkerDrivenBaseModel):
 
 class BandSeenSetSummary(MarkerDrivenBaseModel):
 
-    related_svg_summary: ClassVar[Path] = Path("images/many-artists-overview.svg")
+    related_svg_summary: ClassVar[Path] = images_path / "many-artists-overview.svg"
 
     marker_times_seen: ClassVar[str] = "N"
 
@@ -356,7 +355,7 @@ class MetaInfo(MarkerDrivenBaseModel):
 
 
 class UserAnalysis(MarkerDrivenBaseModel):
-    related_svg_solo_export: ClassVar[Path] = Path("images/user-high-level.svg")
+    related_svg_solo_export: ClassVar[Path] = images_path / "user-high-level.svg"
 
     marker_days_with_show: ClassVar[str] = "Ds"
     days_with_show: int
@@ -441,7 +440,7 @@ if __name__ == "__main__":
         prices=[98, 121],
     )
 
-    svg = Path("images/drawing.svg")
+    svg = images_path / "drawing.svg"
 
     svg_content = svg.read_text()
 
@@ -449,6 +448,6 @@ if __name__ == "__main__":
 
     svg_content = meta_data.apply_self_to_text(svg_content)
 
-    svgg = Path("images/auto.svg")
+    svgg = images_path / "auto.svg"
 
     svgg.write_text(svg_content)
