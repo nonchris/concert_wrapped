@@ -77,6 +77,9 @@ def run_garbage_collector_loop(stop_event: Event, interval_minutes: int | None =
         stop_event: Event to signal when to stop the loop.
         interval_minutes: Interval in minutes between cleanup runs. If None, reads from GC_INTERVAL_MINUTES env var (default: 10).
     """
+    logger.info(f"GC loop enabled, waiting one minute before first cleanup!")
+    stop_event.wait(timeout=60)
+
     if interval_minutes is None:
         interval_minutes = int(os.environ.get("GC_INTERVAL_MINUTES", "10"))
 
