@@ -138,7 +138,7 @@
      style="display:inline">
     <text
        xml:space="preserve"
-       style="font-size:58.6667px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#00ff00;stroke-width:0.525518"
+       style="font-size:58.6667px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#00fe00;stroke-width:0.525518"
        x="529.71753"
        y="122.11295"
        id="text1"
@@ -172,10 +172,10 @@
          id="tspan7"
          x="240.00349"
          y="203.81866"
-         style="fill:#00ff00;stroke:#ff0808;stroke-width:0.247024;stroke-opacity:0" /></text>
+         style="fill:#00fe00;stroke:#ff0808;stroke-width:0.247024;stroke-opacity:0" /></text>
     <text
        xml:space="preserve"
-       style="font-size:37.3333px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:#00ff00;stroke:#ff0808;stroke-width:1.034;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:0"
+       style="font-size:37.3333px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:#00fe00;stroke:#ff0808;stroke-width:1.034;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:0"
        x="540.54706"
        y="232.70023"
        id="text9"
@@ -256,6 +256,6 @@
          id="tspan14"
          x="540.03003"
          y="834.97162"
-         style="font-size:53.3333px;fill:#00ff00">&lt;Ad1&gt;</tspan></text>
+         style="font-size:53.3333px;fill:#00fe00">&lt;Ad1&gt;</tspan></text>
   </g>
 </svg>

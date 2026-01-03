@@ -139,7 +139,7 @@
      style="display:inline">
     <text
        xml:space="preserve"
-       style="font-size:50.4498px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#00ff00;stroke-width:0.525518"
+       style="font-size:50.4498px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#00fe00;stroke-width:0.525518"
        x="36.392857"
        y="78.641258"
        id="text1"
@@ -173,10 +173,10 @@
          id="tspan7"
          x="240.00349"
          y="203.81866"
-         style="fill:#00ff00;stroke:#ff0808;stroke-width:0.247024;stroke-opacity:0">&lt;BANDS&gt;</tspan></text>
+         style="fill:#00fe00;stroke:#ff0808;stroke-width:0.247024;stroke-opacity:0">&lt;BANDS&gt;</tspan></text>
     <text
        xml:space="preserve"
-       style="font-size:26.6667px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:#00ff00;stroke:#ff0808;stroke-width:1.034;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:0"
+       style="font-size:26.6667px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:#00fe00;stroke:#ff0808;stroke-width:1.034;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:0"
        x="239.02309"
        y="251.70078"
        id="text9"
@@ -188,6 +188,6 @@
     <text
        xml:space="preserve"
        id="text2"
-       style="fill:#00ff00;text-orientation:auto;font-size:26.66666667px;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3)" />
+       style="fill:#00fe00;text-orientation:auto;font-size:26.66666667px;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3)" />
   </g>
 </svg>
