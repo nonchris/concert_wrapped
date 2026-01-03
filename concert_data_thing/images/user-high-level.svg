@@ -103,13 +103,13 @@
        height="20"
        patternTransform="translate(190,350)"
        preserveAspectRatio="xMidYMid"
-       style="fill:#000000"
+       style="fill:#010000"
        id="pattern6-7"
        inkscape:label=""
        inkscape:collect="always"
        inkscape:isstock="true">
       <path
-         style="fill:none;stroke:#000000;stroke-width:10;stroke-linecap:butt;stroke-dasharray:none;paint-order:stroke markers fill;stop-color:#000000"
+         style="fill:none;stroke:#010000;stroke-width:10;stroke-linecap:butt;stroke-dasharray:none;paint-order:stroke markers fill;stop-color:#010000"
          d="M 0,5 C 19,5 10,15 29,15"
          id="path4-2"
          sodipodi:nodetypes="cc" />
@@ -118,7 +118,7 @@
        id="linearGradient3"
        inkscape:collect="always">
       <stop
-         style="stop-color:#000000;stop-opacity:1;"
+         style="stop-color:#010000;stop-opacity:1;"
          offset="0"
          id="stop3" />
       <stop
