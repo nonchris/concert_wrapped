@@ -293,7 +293,7 @@ def analyze_concert_csv(
     headliner_by_date = {}
     for date_val, day_df in df.groupby(DATE):
         target_index = -1 if running_order_headline_last else 0
-        headliner = day_df[ARTIST].iloc[target_index] if len(day_df) > 0 else None
+        headliner = determine_headliner_for_day(day_df, festival_label, headline_label, target_index)
         headliner_by_date[date_val] = headliner
 
     # Initialize QUALIFIED_NAME with headliner for all rows
@@ -810,7 +810,7 @@ def get_concert_types_for_artist(
     artist: str, df: DataFrame, festival_label: str, headline_label: str, target_index: int
 ) -> list[tuple[datetime.datetime, int]]:
 
-    headliner_for_day = []
+    classification_for_day = []
 
     for day, group in df.groupby(level=0):  # level=0 is DATE
 
@@ -820,16 +820,34 @@ def get_concert_types_for_artist(
         # Check festival first (always uses TYPE column)
         type_value = group.loc[group[ARTIST] == artist, TYPE].iloc[0]
 
-        if type_value == festival_label:
-            headliner_for_day.append((day, TopBandContext.TYPE_FESTIVAL))
-        # Check headline: either by running order (if "auto") or by TYPE column value
-        elif (type_value == headline_label and headline_label != "auto") or group.iloc[target_index][ARTIST] == artist:
-            headliner_for_day.append((day, TopBandContext.TYPE_HEADLINE))
-        else:
-            # Default to support if neither headline nor support label matched
-            headliner_for_day.append((day, TopBandContext.TYPE_SUPPORT))
+        headliner = determine_headliner_for_day(group, festival_label, headline_label, target_index)
 
-    return headliner_for_day
+        # Festival stays festival
+        if type_value == festival_label:
+            classification_for_day.append((day, TopBandContext.TYPE_FESTIVAL))
+        # Headliner is the artist
+        elif headliner == artist:
+            classification_for_day.append((day, TopBandContext.TYPE_HEADLINE))
+        # Default to support if neither headline nor support label matched
+        else:
+            classification_for_day.append((day, TopBandContext.TYPE_SUPPORT))
+
+    return classification_for_day
+
+
+def determine_headliner_for_day(group: DataFrame, festival_label: str, headline_label: str, target_index: int) -> str:
+
+    # detect by running order
+    if headline_label == "auto":
+        return group.iloc[target_index][ARTIST]
+
+    # detect by festival label (choose venue as headliner, since we can't determine the headliner from the festival label alone)
+    elif group.iloc[target_index][TYPE] == festival_label:
+        return group.iloc[target_index][VENUE]
+
+    # detect by headline label (choose the headliner from the headline label)
+    else:
+        return group.loc[group[TYPE] == headline_label][ARTIST]
 
 
 context_collectors: dict[str, tuple[Callable, Callable]] = {
