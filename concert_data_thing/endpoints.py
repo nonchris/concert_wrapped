@@ -44,6 +44,9 @@ class AnalyzeConcertRequest(BaseModel):
     original_price: str = "Preis"
     merch_cost: str = "Merch Ausgaben"
     type: str = "Typ"
+    headline_label: str = "auto"
+    support_label: str = "auto"
+    festival_label: str = "F"
     event_name: str = "Event Name"
     running_order_headline_last: bool = True
 
@@ -199,6 +202,9 @@ async def analyze_concert_route(request: AnalyzeConcertRequest) -> AnalyzeConcer
         original_price=request.original_price,
         merch_cost=request.merch_cost,
         type=request.type,
+        headline_label=request.headline_label,
+        support_label=request.support_label,
+        festival_label=request.festival_label,
         event_name=request.event_name,
         running_order_headline_last=request.running_order_headline_last,
         request_id=request_id,

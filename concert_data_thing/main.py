@@ -220,6 +220,9 @@ def analyze_concert_csv(
     original_price: str = "Preis",
     merch_cost: str = "Merch Ausgaben",
     type: str = "Typ",
+    headline_label: str = "auto",
+    support_label: str = "auto",
+    festival_label: str = "F",
     event_name: str = "Event Name",
     running_order_headline_last: bool = True,
     request_id: uuid.UUID = "00000000-0000-0000-0000-000000000000",
@@ -243,6 +246,9 @@ def analyze_concert_csv(
         original_price (str): Column name for original price (default: "Preis").
         merch_cost (str): Column name for merch cost (default: "Merch Ausgaben").
         type (str): Column name for type (default: "Typ").
+        headline_label (str): Label for headline acts in Type column, or "auto" to detect by running order (default: "auto").
+        support_label (str): Label for support acts in Type column, or "auto" to detect by running order (default: "auto").
+        festival_label (str): Label for festival acts in Type column (default: "F").
         event_name (str): Column name for event name (default: "Event Name").
         running_order_headline_last (bool): If True, order is correct (headline last).
                                            If False, reverse the order (headline first).
@@ -305,7 +311,16 @@ def analyze_concert_csv(
     user_data_folder.mkdir(parents=True, exist_ok=True)
 
     logger.info("Generating artist SVGs")
-    artist_svgs = create_svgs_for(df_indexed, meta_info, ARTIST, running_order_headline_last, user_data_folder)
+    artist_svgs = create_svgs_for(
+        df_indexed,
+        meta_info,
+        ARTIST,
+        running_order_headline_last,
+        user_data_folder,
+        headline_label=headline_label,
+        support_label=support_label,
+        festival_label=festival_label,
+    )
     logger.info(f"Generated {len(artist_svgs)} artist SVG files")
 
     logger.info("Generating venue SVGs")
@@ -314,11 +329,11 @@ def analyze_concert_csv(
 
     logger.info("Generating city SVGs")
     city_svgs = create_svgs_for(df_indexed, meta_info, CITY, running_order_headline_last, user_data_folder)
-    logger.info(f"Generated {len(venue_svgs)} city SVG files")
+    logger.info(f"Generated {len(city_svgs)} city SVG files")
 
     logger.info("Performing high-level user analysis")
-    user_analysis, user_svg_paths = high_level_user_analysis(
-        df_indexed, meta_info, running_order_headline_last, user_data_folder
+    user_svg_paths = high_level_user_analysis(
+        df_indexed, meta_info, running_order_headline_last, user_data_folder, festival_label=festival_label
     )
     logger.info("Analysis complete")
 
@@ -348,14 +363,16 @@ def find_most_expensive_ticket(df: DataFrame) -> tuple[float, str]:
         return 0.0, "[unknown]"
 
 
-def collect_data_for_user_analysis(df_indexed: DataFrame, running_order_headline_last: bool) -> UserAnalysis:
+def collect_data_for_user_analysis(
+    df_indexed: DataFrame, running_order_headline_last: bool, festival_label: str = "F"
+) -> UserAnalysis:
     """
     Collect user-level analysis data from the DataFrame.
 
     Handles multi-day festivals by only counting ticket cost once for sequential
-    days where TYPE="F" and VENUE is the same.
+    days where TYPE equals festival_label and VENUE is the same.
     """
-    logger.debug("Collecting user-level analysis data")
+    logger.debug(f"Collecting user-level analysis data with festival_label={festival_label}")
     # Count unique days with shows
     unique_dates = df_indexed.index.get_level_values(0).unique()
     days_with_show = len(unique_dates)
@@ -372,7 +389,7 @@ def collect_data_for_user_analysis(df_indexed: DataFrame, running_order_headline
         .agg(
             {
                 PAID_PRICE: "first",
-                TYPE: lambda x: (x == "F").any(),
+                TYPE: lambda x: (x == festival_label).any(),
                 VENUE: "first",
                 ARTIST: "last" if running_order_headline_last else "first",
                 QUALIFIED_NAME: "first",
@@ -423,7 +440,7 @@ def collect_data_for_user_analysis(df_indexed: DataFrame, running_order_headline
     mean_ticket_cost_wo_festival = round(df_no_festival["price"].mean(), 2) if len(df_no_festival) > 0 else 0.0
 
     # Calculate price per set
-    sets_wo_festival = len(df_reset[df_reset[TYPE] != "F"])
+    sets_wo_festival = len(df_reset[df_reset[TYPE] != festival_label])
     price_per_set = round(total_ticket_cost / sets_seen, 2) if sets_seen > 0 else 0.0
     price_per_set_wo_festival = (
         round(total_ticket_cost_wo_festival / sets_wo_festival, 2) if sets_wo_festival > 0 else 0.0
@@ -469,15 +486,21 @@ def collect_data_for_user_analysis(df_indexed: DataFrame, running_order_headline
 
 
 def high_level_user_analysis(
-    df_indexed: DataFrame, meta_info: MetaInfo, running_order_headline_last: bool, user_data_folder: Path
-) -> tuple[UserAnalysis, list[Path]]:
-    """Perform high-level user analysis and return the analysis object and SVG path."""
-    logger.debug("Starting high-level user analysis")
+    df_indexed: DataFrame,
+    meta_info: MetaInfo,
+    running_order_headline_last: bool,
+    user_data_folder: Path,
+    festival_label: str = "F",
+) -> list[Path]:
+    """Perform high-level user analysis and return SVG paths."""
+    logger.debug(f"Starting high-level user analysis with festival_label={festival_label}")
     visited_venues = count_column_occurrences(df_indexed, VENUE)
     venues_unique = visited_venues.unique()
     unique_artists = df_indexed[ARTIST].dropna().unique()
 
-    user_analysis = collect_data_for_user_analysis(df_indexed, running_order_headline_last)
+    user_analysis = collect_data_for_user_analysis(
+        df_indexed, running_order_headline_last, festival_label=festival_label
+    )
 
     # Count how many entries there are per day on the index
     entries_per_day = df_indexed.groupby(level=0).size()
@@ -526,11 +549,18 @@ def high_level_user_analysis(
     user_svg_path.write_text(svg_text)
     logger.info(f"Saved high-level user analysis SVG to {user_svg_path}")
 
-    return user_analysis, [user_svg_path]
+    return [user_svg_path]
 
 
 def create_svgs_for(
-    df_indexed: DataFrame, meta_info: MetaInfo, column: str, running_order_headline_last: bool, user_data_folder: Path
+    df_indexed: DataFrame,
+    meta_info: MetaInfo,
+    column: str,
+    running_order_headline_last: bool,
+    user_data_folder: Path,
+    headline_label: str = "auto",
+    support_label: str = "auto",
+    festival_label: str = "F",
 ) -> list[Path]:
 
     logger.debug(f"Creating SVGs for column: {column}")
@@ -550,13 +580,25 @@ def create_svgs_for(
         elements = attendance_counts[attendance_counts == seen_nr].index.values
         logger.debug(f"Processing {len(elements)} elements with {seen_nr} occurrences for {column}")
         for a in elements:
-            ctx = context_collector(
-                df_indexed,
-                a,
-                position_in_ranking=i,
-                running_order_headline_last=running_order_headline_last,
-                column=column,
-            )
+            if column == ARTIST:
+                ctx = context_collector(
+                    df_indexed,
+                    a,
+                    position_in_ranking=i,
+                    running_order_headline_last=running_order_headline_last,
+                    column=column,
+                    headline_label=headline_label,
+                    support_label=support_label,
+                    festival_label=festival_label,
+                )
+            else:
+                ctx = context_collector(
+                    df_indexed,
+                    a,
+                    position_in_ranking=i,
+                    running_order_headline_last=running_order_headline_last,
+                    column=column,
+                )
             data_contexts_dict[seen_nr].append(ctx)
 
         key = lambda x: x.key()
@@ -625,7 +667,6 @@ def collect_data_for_venue_like(
     """Collect venue-related data from the DataFrame to create a VenueContext."""
 
     logger.debug(f"Collecting data for venue: {venue} (position {position_in_ranking})")
-    target_index = -1 if running_order_headline_last else 0
 
     venue_df = df[df[column] == venue]
 
@@ -665,10 +706,21 @@ def collect_data_for_venue_like(
 
 
 def collect_data_for_artist(
-    df: pd.DataFrame, artist: str, *, running_order_headline_last: bool, position_in_ranking: int, column: str = ARTIST
+    df: pd.DataFrame,
+    artist: str,
+    *,
+    running_order_headline_last: bool,
+    position_in_ranking: int,
+    column: str = ARTIST,
+    headline_label: str = "auto",
+    support_label: str = "auto",
+    festival_label: str = "F",
 ) -> TopBandContext:
 
-    logger.debug(f"Collecting data for artist: {artist} (position {position_in_ranking})")
+    logger.debug(
+        f"Collecting data for artist: {artist} (position {position_in_ranking}), "
+        f"headline_label={headline_label}, support_label={support_label}, festival_label={festival_label}"
+    )
     target_index = -1 if running_order_headline_last else 0
 
     # Check for each day if the artist was at the target_index (headliner position) for that day
@@ -679,12 +731,15 @@ def collect_data_for_artist(
         if artist not in group[ARTIST].values:
             continue
 
-        # Sorted by per_day_idx (the default after set_index)
-        if group.iloc[target_index][ARTIST] == artist:
-            headliner_for_day.append((day, TopBandContext.TYPE_HEADLINE))
-        elif group[TYPE].iloc[0] == "F":
+        # Check festival first (always uses TYPE column)
+        type_value = group[TYPE].iloc[0]
+        if type_value == festival_label:
             headliner_for_day.append((day, TopBandContext.TYPE_FESTIVAL))
+        # Check headline: either by running order (if "auto") or by TYPE column value
+        elif (type_value == headline_label and headline_label != "auto") or group.iloc[target_index][ARTIST] == artist:
+            headliner_for_day.append((day, TopBandContext.TYPE_HEADLINE))
         else:
+            # Default to support if neither headline nor support label matched
             headliner_for_day.append((day, TopBandContext.TYPE_SUPPORT))
 
     headliner_for_day = pd.DataFrame(headliner_for_day, columns=[DATE, "is_headliner"])
