@@ -296,6 +296,14 @@ def analyze_concert_csv(
         headliner = determine_headliner_for_day(day_df, festival_label, headline_label, target_index)
         headliner_by_date[date_val] = headliner
 
+    if len(headliner_by_date) == 0:
+        raise HTTPException(
+            400,
+            f"Parsing of data failed (no valid row found). "
+            f"This is likely due an invalid date format string. "
+            f"Other issues could be: Invalid data in the Artist, Type or Venue columns.",
+        )
+
     # Initialize QUALIFIED_NAME with headliner for all rows
     df[QUALIFIED_NAME] = df[DATE].map(headliner_by_date)
 
