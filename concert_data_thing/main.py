@@ -10,8 +10,10 @@ import dayplot as dp
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from matplotlib.colors import LinearSegmentedColormap
 from pandas import DataFrame
 
+from concert_data_thing.data_models.settings import SVGStyleGuide
 from concert_data_thing.img_processing import BandSeenSetSummary
 from concert_data_thing.img_processing import MarkerDrivenBaseModel
 from concert_data_thing.img_processing import MetaInfo
@@ -226,6 +228,7 @@ def analyze_concert_csv(
     festival_label: str = "F",
     event_name: str = "Event Name",
     running_order_headline_last: bool = True,
+    color_scheme: SVGStyleGuide = SVGStyleGuide(),
     request_id: uuid.UUID = "00000000-0000-0000-0000-000000000000",
 ):
     """
@@ -253,6 +256,7 @@ def analyze_concert_csv(
         event_name (str): Column name for event name (default: "Event Name").
         running_order_headline_last (bool): If True, order is correct (headline last).
                                            If False, reverse the order (headline first).
+
         request_id (uuid.UUID): Request ID for the analysis.
     """
 
@@ -322,20 +326,30 @@ def analyze_concert_csv(
         headline_label=headline_label,
         support_label=support_label,
         festival_label=festival_label,
+        color_scheme=color_scheme,
     )
     logger.info(f"Generated {len(artist_svgs)} artist SVG files")
 
     logger.info("Generating venue SVGs")
-    venue_svgs = create_svgs_for(df_indexed, meta_info, VENUE, running_order_headline_last, user_data_folder)
+    venue_svgs = create_svgs_for(
+        df_indexed, meta_info, VENUE, running_order_headline_last, user_data_folder, color_scheme=color_scheme
+    )
     logger.info(f"Generated {len(venue_svgs)} venue SVG files")
 
     logger.info("Generating city SVGs")
-    city_svgs = create_svgs_for(df_indexed, meta_info, CITY, running_order_headline_last, user_data_folder)
+    city_svgs = create_svgs_for(
+        df_indexed, meta_info, CITY, running_order_headline_last, user_data_folder, color_scheme=color_scheme
+    )
     logger.info(f"Generated {len(city_svgs)} city SVG files")
 
     logger.info("Performing high-level user analysis")
     user_svg_paths = high_level_user_analysis(
-        df_indexed, meta_info, running_order_headline_last, user_data_folder, festival_label=festival_label
+        df_indexed,
+        meta_info,
+        running_order_headline_last,
+        user_data_folder,
+        festival_label=festival_label,
+        color_scheme=color_scheme,
     )
     logger.info("Analysis complete")
 
@@ -493,6 +507,7 @@ def high_level_user_analysis(
     running_order_headline_last: bool,
     user_data_folder: Path,
     festival_label: str = "F",
+    color_scheme: SVGStyleGuide = SVGStyleGuide(),
 ) -> list[Path]:
     """Perform high-level user analysis and return SVG paths."""
     logger.debug(f"Starting high-level user analysis with festival_label={festival_label}")
@@ -517,8 +532,9 @@ def high_level_user_analysis(
         start_date=f"{meta_info.year}-01-01",
         end_date=f"{meta_info.year}-12-31",
         ax=ax,
-        day_kws={"color": "white"},
-        month_kws={"color": "white"},
+        cmap=LinearSegmentedColormap.from_list("my_cmap", [color_scheme.gradient_high, color_scheme.text_color]),
+        day_kws={"color": color_scheme.text_color},
+        month_kws={"color": color_scheme.text_color},
     )
 
     # Set calendar background to transparent
@@ -546,6 +562,7 @@ def high_level_user_analysis(
     # Apply user analysis and meta info to SVG
     svg_text = user_analysis.apply_self_to_text(svg_text)
     svg_text = meta_info.apply_self_to_text(svg_text)
+    svg_text = color_scheme.apply_self_to_text(svg_text)
 
     user_svg_path = user_data_folder / "user-high-level.svg"
     user_svg_path.write_text(svg_text)
@@ -563,6 +580,7 @@ def create_svgs_for(
     headline_label: str = "auto",
     support_label: str = "auto",
     festival_label: str = "F",
+    color_scheme: SVGStyleGuide = SVGStyleGuide(),
 ) -> list[Path]:
 
     logger.debug(f"Creating SVGs for column: {column}")
@@ -613,6 +631,7 @@ def create_svgs_for(
         svg_text = data_contexts_dict[next(iter(data_contexts_dict.keys()))][0].related_svg_unique_top_4.read_text()
 
         svg_text = meta_info.apply_self_to_text(svg_text)
+        svg_text = color_scheme.apply_self_to_text(svg_text)
 
         for a in data_contexts_dict.values():
             element = a[0]
@@ -645,6 +664,7 @@ def create_svgs_for(
     logger.debug(f"Generating {len(all_contexts_flat)} solo SVG files for {column}")
     svg_text_template = all_contexts_flat[0].related_svg_solo_export.read_text()
     svg_text_template = meta_info.apply_self_to_text(svg_text_template)
+    svg_text_template = color_scheme.apply_self_to_text(svg_text_template)
     context: TopBandContext | VenueContext
     for context in all_contexts_flat:
         svg_text = context.apply_self_to_text(svg_text_template, is_ranked=False)

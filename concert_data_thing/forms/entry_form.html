@@ -449,6 +449,22 @@
                     </div>
                     <div class="help-text">If checked, the order is correct (headline last). If unchecked, reverse the order (headline first). No effect if labeled 'franka-style'.</div>
                 </div>
+                <div class="form-group">
+                    <div style="display: flex; gap: 10px;">
+                        <div style="flex: 1;">
+                            <label for="gradient_high">Gradient High Color</label>
+                            <input type="text" id="gradient_high" name="gradient_high" value="#000000" placeholder="#000000">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="gradient_low">Gradient Low Color</label>
+                            <input type="text" id="gradient_low" name="gradient_low" value="#0000FF" placeholder="#0000FF">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="text_color">Text Color</label>
+                            <input type="text" id="text_color" name="text_color" value="#00FF00" placeholder="#00FF00">
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <button type="submit">Analyze Concert Data</button>
@@ -520,7 +536,10 @@
                     support_label: formData.get("support_label") || "auto",
                     festival_label: formData.get("festival_label") || "F",
                     event_name: formData.get("event_name") || "Event Name",
-                    running_order_headline_last: formData.get("running_order_headline_last") === "on"
+                    running_order_headline_last: formData.get("running_order_headline_last") === "on",
+                    gradient_high: formData.get("gradient_high") || "#000000",
+                    gradient_low: formData.get("gradient_low") || "#0000FF",
+                    text_color: formData.get("text_color") || "#00FF00"
                 };
 
                 console.log("[submit] Sending request to /api/v1/analyze-concert");

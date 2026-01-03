@@ -20,6 +20,7 @@ from fastapi.security import HTTPBasic
 from fastapi.security import HTTPBasicCredentials
 from pydantic import BaseModel
 
+from concert_data_thing.data_models.settings import SVGStyleGuide
 from concert_data_thing.logger import LOGGING_PROVIDER
 from concert_data_thing.main import analyze_concert_csv
 
@@ -99,6 +100,9 @@ class AnalyzeConcertRequest(BaseModel):
     festival_label: str = "F"
     event_name: str = "Event Name"
     running_order_headline_last: bool = True
+    gradient_high: str = "#000000"
+    gradient_low: str = "#0000ff"
+    text_color: str = "#00ff00"
 
 
 def create_app() -> FastAPI:
@@ -274,6 +278,11 @@ async def analyze_concert_route(
         festival_label=request.festival_label,
         event_name=request.event_name,
         running_order_headline_last=request.running_order_headline_last,
+        color_scheme=SVGStyleGuide(
+            gradient_high=request.gradient_high.lower(),
+            gradient_low=request.gradient_low.lower(),
+            text_color=request.text_color.lower(),
+        ),
         request_id=request_id,
     )
 
