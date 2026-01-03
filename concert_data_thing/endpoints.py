@@ -6,6 +6,8 @@ import uuid
 import zipfile
 from contextlib import asynccontextmanager
 from pathlib import Path
+from threading import Event
+from threading import Thread
 
 from fastapi import Depends
 from fastapi import FastAPI
@@ -21,6 +23,7 @@ from fastapi.security import HTTPBasicCredentials
 from pydantic import BaseModel
 
 from concert_data_thing.data_models.settings import SVGStyleGuide
+from concert_data_thing.garbage_collector import run_garbage_collector_loop
 from concert_data_thing.logger import LOGGING_PROVIDER
 from concert_data_thing.main import analyze_concert_csv
 
@@ -76,8 +79,17 @@ def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)) ->
 async def lifespan(app: FastAPI):
     """Handle application lifespan events."""
     # Startup
+    stop_event = Event()
+    gc_thread = Thread(target=run_garbage_collector_loop, args=(stop_event,), daemon=True)
+    gc_thread.start()
+    logger.info("Garbage collector thread started")
+
     yield
+
     # Shutdown
+    stop_event.set()
+    gc_thread.join(timeout=5)
+    logger.info("Garbage collector thread stopped")
 
 
 class AnalyzeConcertRequest(BaseModel):
