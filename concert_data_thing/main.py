@@ -859,12 +859,15 @@ def determine_headliner_for_day(group: DataFrame, festival_label: str, headline_
         return group.iloc[target_index][ARTIST]
 
     # detect by festival label (choose venue as headliner, since we can't determine the headliner from the festival label alone)
-    elif group.iloc[target_index][TYPE] == festival_label:
+    # we use contains since Franka has multiple labels for headline slots in festivals (e.g. "Festival, Main Act")
+    elif len(group.loc[group[TYPE].str.contains(festival_label, na=False)]) > 0:
         return group.iloc[target_index][VENUE]
 
     # detect by headline label (choose the headliner from the headline label)
     else:
-        return group.loc[group[TYPE] == headline_label][ARTIST]
+        # We need those rows of 'TYPE' where 'headline_label' is in the type string
+        # reason for conatins at elif above
+        return group.loc[group[TYPE].str.contains(headline_label, na=False)][ARTIST].iloc[0]
 
 
 context_collectors: dict[str, tuple[Callable, Callable]] = {
