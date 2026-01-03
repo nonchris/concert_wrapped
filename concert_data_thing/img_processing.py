@@ -1,4 +1,5 @@
 import datetime as dt
+import os
 from datetime import datetime
 from pathlib import Path
 from typing import ClassVar
@@ -7,6 +8,9 @@ import numpy as np
 from pydantic import AliasPath
 from pydantic import BaseModel
 from pydantic.fields import FieldInfo
+
+# get folder of this file
+images_path = os.path.dirname(os.path.realpath(__file__)) + "/images"
 
 
 class MarkerDrivenBaseModel(BaseModel):
@@ -96,9 +100,9 @@ class TopBandContext(PriceAble):
     TYPE_SUPPORT: ClassVar[int] = 2
     TYPE_FESTIVAL: ClassVar[int] = 3
 
-    related_svg_unique_top_4: ClassVar[Path] = Path("images/top4bands.svg")
+    related_svg_unique_top_4: ClassVar[Path] = images_path + "/top4bands.svg"
 
-    related_svg_solo_export: ClassVar[Path] = Path("images/one-artist.svg")
+    related_svg_solo_export: ClassVar[Path] = images_path + "/one-artist.svg"
 
     def key(self):
         return self.headline_shows_count, self.total_cost

@@ -1,0 +1,12 @@
+services:
+  concert_data_thing:
+    build: .
+    container_name: concert_data_thing
+    ports:
+      - "127.0.0.1:8005:8000"
+    volumes:
+      - ./data/logs:/app/data/logs
+      - ./data/artifacts:/app/data/artifacts
+    environment:
+      - LOG_DIR=/app/data/logs
+      - ARTIFACTS_PATH=/app/data/artifacts

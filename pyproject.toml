@@ -112,6 +112,7 @@ start-concert-api = "concert_data_thing.endpoints:main"
 # If there are data files included in your packages that need to be
 # installed, specify them here.
 # package-data = { "sample" = ["*.dat"] }
+include-package-data = true
 
 [tool.setuptools.dynamic]
 dependencies = { file = ["requirements.txt"] }
