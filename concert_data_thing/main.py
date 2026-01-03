@@ -1,6 +1,7 @@
 import datetime
 import io
 import os
+import re
 import uuid
 from collections import defaultdict
 from pathlib import Path
@@ -685,13 +686,17 @@ def create_svgs_for(
     for context in all_contexts_flat:
         svg_text = context.apply_self_to_text(svg_text_template, is_ranked=False)
 
-        output_path = user_data_folder / f"solo-{column}-{context.position}-{context.name}.svg"
+        output_path = user_data_folder / f"solo-{column}-{context.position}-{sanitize_filename(context.name)}.svg"
         output_path.write_text(svg_text)
         svgs.append(output_path)
         logger.debug(f"Saved solo SVG: {output_path}")
 
     logger.info(f"Generated {len(svgs)} SVG files for {column}")
     return svgs
+
+
+def sanitize_filename(name):
+    return re.sub(r"[^a-zA-Z0-9_-]", "", name)
 
 
 def collect_data_for_venue_like(
