@@ -335,6 +335,8 @@
                         Empty rows are no problem as well.<br>
                         You can find an example CSV <a href="/api/v1/example-data">here</a>.
                         <br><br>
+                        Missing data in nummerical columns is treated as 0, this will likely affect the analysis.
+                        <br><br>
                         "Comma-Separated Values" is a data format where the values of each row are separated by specific character.<br>
                         Nearly every spreadsheet editor supports the export of a table as CSV.<br>
                         You can configure the chosen separator character below under "Options".
@@ -353,7 +355,7 @@
             </div>
 
             <div class="section">
-                <div class="section-title">Column Names (Optional)
+                <div class="section-title">Column Names
                     <div class="help-text">
                         Here you declare how the data columns are called in your pasted table.
                         Not all of these columns are currently used in analysis, but it's required to label them all.
@@ -366,7 +368,13 @@
                         <input type="text" id="date" name="date" value="Date" placeholder="Date" style="flex: 0.5;">
                         <input type="text" id="date_format" name="date_format" value="%d.%m.%y" placeholder="%d.%m.%y" style="flex: 1;">
                     </div>
-                    <div class="help-text">Date column name (left) and how to interpret date format (right). Examples: %d.%m.%y, %Y-%m-%d, %m/%d/%Y</div>
+                    <div class="help-text">
+                        Date column name (left) and how to interpret date format (right).<br>
+                        Examples: <code>%d.%m.%y</code> (e.g. 21.07.2025),
+                        <code>%Y-%m-%d</code> (e.g. 2025-07-21).<br>
+                        Refer to Python's strftime/strptime format codes for more options:
+                        <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes" target="_blank" rel="noopener">reference</a>.
+                        <br><br>
                 </div>
                 <div class="form-group">
                     <label for="artist">Artist Column</label>
@@ -395,7 +403,7 @@
                         Column labeling what type of show a row is (headline, support, festival).<br>
                         There are two modes available to detect whether an entry is a headline, support show:<br>
                         Order the rows (per date) in a way that the headliner is always the first or last entry and declare type binary (festival, not festival).<br>
-                        Provide a more sophisticated column to declare it using three labels instead of two ('franka-style').
+                        Provide a more sophisticated column to declare it using three labels instead of two ('franka-style'), for festivals the venue name is used as 'headliner' if no Event Name is provided.
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
                         <div style="flex: 1;">
