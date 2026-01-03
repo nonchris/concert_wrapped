@@ -13,9 +13,9 @@ class SVGStyleGuide(MarkerDrivenBaseModel):
     text_color: str = "#00ff00"
 
     # these are the default colors in the SVG templates
-    marker_gradient_high: ClassVar[str] = "#000000"
-    marker_gradient_low: ClassVar[str] = "#0000ff"
-    marker_text_color: ClassVar[str] = "#00ff00"
+    marker_gradient_high: ClassVar[str] = "#010000"
+    marker_gradient_low: ClassVar[str] = "#0000fe"
+    marker_text_color: ClassVar[str] = "#00fe00"
 
     def key_processor(self, k: str, is_ranked: bool):
         return k
