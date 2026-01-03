@@ -31,6 +31,9 @@ BASIC_AUTH_USERNAME = os.getenv("BASIC_AUTH_USERNAME", None)
 BASIC_AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD", None)
 BASIC_AUTH_ENABLED = bool(BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD)
 
+static_folder = Path(__file__).resolve().parent / "forms"
+entry_point_form = (static_folder / "entry_form.html").read_text()
+
 # FastAPI security scheme
 if BASIC_AUTH_ENABLED:
     security = HTTPBasic()
@@ -128,8 +131,6 @@ def create_app() -> FastAPI:
 
 app = create_app()
 
-entry_point_form = (Path(__file__).parent / "forms" / "entry_form.html").read_text()
-
 
 def get_svg_path(relative_path: str) -> Path:
     """Get absolute path for a relative SVG path."""
@@ -217,11 +218,11 @@ async def index(credentials: HTTPBasicCredentials = Depends(verify_credentials))
     return HTMLResponse(content=entry_point_form)
 
 
-@app.get("/favicon.png")
-async def favicon() -> FileResponse:
-    """Serve the favicon."""
-    favicon_path = Path(__file__).parent / "forms" / "favicon.png"
-    return FileResponse(favicon_path)
+@app.get("/favicon.ico")
+async def favicon_ico() -> FileResponse:
+    """Serve the favicon as ICO (browsers request this by default)."""
+    favicon_path = static_folder / "favicon.png"
+    return FileResponse(favicon_path, media_type="image/png")
 
 
 @app.get("/health")
