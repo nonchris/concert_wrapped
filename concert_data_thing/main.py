@@ -684,6 +684,7 @@ def create_svgs_for(
     svg_text_template = meta_info.apply_self_to_text(svg_text_template)
     svg_text_template = color_scheme.apply_self_to_text(svg_text_template)
     context: TopBandContext | VenueContext
+
     for context in all_contexts_flat:
         svg_text = context.apply_self_to_text(svg_text_template, is_ranked=False)
 
@@ -731,6 +732,7 @@ def collect_data_for_venue_like(
 
         headline_per_night.append(group[QUALIFIED_NAME].iloc[0])
         # Count number of unique artists/bands for this night at this venue
+        # TODO can dropna be evil here?!
         num_bands = len(group[ARTIST].dropna().unique())
         num_bands_per_night.append(num_bands)
         # Some ppl store the price only for the headline instead of for all bands, so wetake max instead of unique
