@@ -421,7 +421,8 @@ def collect_data_for_user_analysis(
         df_reset.groupby(DATE)
         .agg(
             {
-                PAID_PRICE: "first",
+                # max bc some ppl only enter the price on one artist per night (the headline one)
+                PAID_PRICE: "max",
                 TYPE: lambda x: (x == festival_label).any(),
                 VENUE: "first",
                 ARTIST: "last" if running_order_headline_last else "first",
@@ -732,7 +733,10 @@ def collect_data_for_venue_like(
         # Count number of unique artists/bands for this night at this venue
         num_bands = len(group[ARTIST].dropna().unique())
         num_bands_per_night.append(num_bands)
-        prices.extend(group[PAID_PRICE].unique().tolist())
+        # Some ppl store the price only for the headline instead of for all bands, so wetake max instead of unique
+        prices.append(group[PAID_PRICE].max().tolist())
+
+    assert all(map(lambda x: isinstance(x, float), prices))
 
     logger.debug(f"Venue {venue}: {len(visit_dates)} visits, {len(prices)} price entries")
 
