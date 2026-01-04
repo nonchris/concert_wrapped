@@ -243,7 +243,7 @@ async def health() -> dict[str, str]:
     return {"status": "healthy"}
 
 
-@app.get("/api/v1/example-data")
+@app.get("/api/v1/example-chris")
 async def example_data(credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> Response:
     """
     Serve the example CSV data.
@@ -251,14 +251,31 @@ async def example_data(credentials: HTTPBasicCredentials = Depends(verify_creden
     Returns:
         CSV file content.
     """
-    csv_path = static_folder / "example.csv"
+    csv_content = await read_file("example.csv")
+    return HTMLResponse(content=f"<pre>{csv_content}</pre>", media_type="text/html")
+
+
+@app.get("/api/v1/example-franka")
+async def example_data(credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> Response:
+    """
+    Serve the example CSV data.
+
+    Returns:
+        CSV file content.
+    """
+    csv_content = await read_file("example-franka.csv")
+    return HTMLResponse(content=f"<pre>{csv_content}</pre>", media_type="text/html")
+
+
+async def read_file(name: str) -> str:
+    csv_path = static_folder / name
     print(csv_path)
     print(csv_path.absolute())
     if not csv_path.exists():
         raise HTTPException(status_code=404, detail="Example CSV file not found")
 
     csv_content = csv_path.read_text()
-    return HTMLResponse(content=f"<pre>{csv_content}</pre>", media_type="text/html")
+    return csv_content
 
 
 class AnalyzeConcertResponse(BaseModel):
