@@ -319,7 +319,27 @@
 </head>
 <body>
     <div class="container">
-        <h1 style="color: #fff700; text-shadow: 0 0 2px rgba(255,247,0,0.66), 0 0 10px rgba(255,247,0,0.66);">Cyber Chris's Concert CSV Analyzer</h1>
+        <h1 style="color: #fff700; text-shadow: 0 0 2px rgba(255,247,0,0.66), 0 0 10px rgba(255,247,0,0.66);">Cyber Chris's Concert Wrapped</h1>
+        <div class="loading" style="padding: 10px 0; text-align: left;">
+            Welcome!<br>
+            I hope you brought your concert data to the party!<br>
+            <br>
+            We'll analyze your concert data to generate visual statistics.<br>
+            You'll get an overview about your total activity, e.g. how many unique artists you saw.<br>
+            <br>
+            Additionally you'll receive detailed analyses for artists, venues, and cities with various features.<br>
+            Like "What was the average cost to see this band?", "How how many sets have I seen in this venue?"<br>
+            <br>
+            All generated images are SVGs, so they are fully customizable after you download them.<br>
+            <br>
+            You'll find more information on how your data has to be formatted down below.<br>
+            Please keep in mind that this is a private fun project and is still under development.<br>
+            <br>
+            Note: Some text may run out of the image - this is not a bug, it's a result of how the SVGs are generated.<br>
+            You can easily fix this in any SVG editor.<br>
+
+            <br>
+        </div>
         <form id="analyzeForm" method="POST" action="/api/v1/analyze-concert">
             <div class="section">
                 <div class="section-title">Required Fields</div>
@@ -504,6 +524,8 @@
             </div>
 
             <button class="btn-download-all" id="downloadAllBtn">Download All SVGs as ZIP</button>
+
+            <div class="loading">You can search the images using your browser's search functionality.</div>
 
             <div id="galleryArtists" class="gallery"></div>
             <div id="galleryVenues" class="gallery hidden"></div>
