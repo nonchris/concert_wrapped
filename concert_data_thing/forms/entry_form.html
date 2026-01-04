@@ -487,9 +487,9 @@
             </div>
 
             <div class="view-toggle">
-                <button class="toggle-btn active" data-view="artists" id="toggleArtists">Artists</button>
-                <button class="toggle-btn" data-view="venues" id="toggleVenues">Venues</button>
-                <button class="toggle-btn" data-view="cities" id="toggleCities">Cities</button>
+                <button type="button" class="toggle-btn active" data-view="artists" id="toggleArtists">Artists</button>
+                <button type="button" class="toggle-btn" data-view="venues" id="toggleVenues">Venues</button>
+                <button type="button" class="toggle-btn" data-view="cities" id="toggleCities">Cities</button>
             </div>
 
             <button class="btn-download-all" id="downloadAllBtn">Download All SVGs as ZIP</button>
@@ -622,7 +622,9 @@
             const toggleCitiesBtn = document.getElementById("toggleCities");
 
             if (toggleArtistsBtn) {
-                toggleArtistsBtn.addEventListener("click", () => {
+                toggleArtistsBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log("[toggle] Artists button clicked");
                     switchView("artists");
                 });
@@ -631,7 +633,9 @@
             }
 
             if (toggleVenuesBtn) {
-                toggleVenuesBtn.addEventListener("click", () => {
+                toggleVenuesBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log("[toggle] Venues button clicked");
                     switchView("venues");
                 });
@@ -640,7 +644,9 @@
             }
 
             if (toggleCitiesBtn) {
-                toggleCitiesBtn.addEventListener("click", () => {
+                toggleCitiesBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     console.log("[toggle] Cities button clicked");
                     switchView("cities");
                 });
@@ -650,8 +656,11 @@
 
             console.log("[init] Initialization complete");
 
+            // Store the current result data to avoid re-fetching
+            let currentResultData = null;
+
             function switchView(view) {
-                console.log(`[switchView] Switching to ${view} view`);
+                console.log(`[switchView] Switching to ${view} view - no API call, just showing/hiding galleries`);
                 const artistsBtn = document.getElementById("toggleArtists");
                 const venuesBtn = document.getElementById("toggleVenues");
                 const citiesBtn = document.getElementById("toggleCities");
@@ -667,17 +676,17 @@
                 venuesGallery.classList.add("hidden");
                 citiesGallery.classList.add("hidden");
 
-                // Activate selected view
+                // Activate selected view - just toggle visibility, no API calls
                 if (view === "artists") {
-                    console.log("[switchView] Showing artists");
+                    console.log("[switchView] Showing artists gallery (already loaded)");
                     artistsBtn.classList.add("active");
                     artistsGallery.classList.remove("hidden");
                 } else if (view === "venues") {
-                    console.log("[switchView] Showing venues");
+                    console.log("[switchView] Showing venues gallery (already loaded)");
                     venuesBtn.classList.add("active");
                     venuesGallery.classList.remove("hidden");
                 } else if (view === "cities") {
-                    console.log("[switchView] Showing cities");
+                    console.log("[switchView] Showing cities gallery (already loaded)");
                     citiesBtn.classList.add("active");
                     citiesGallery.classList.remove("hidden");
                 }
@@ -685,6 +694,8 @@
 
             function displayResults(result) {
                 console.log("[displayResults] Starting to display results", result);
+                // Store result data for potential reuse
+                currentResultData = result;
 
                 // Display user SVGs (treat as list)
                 const userStats = document.getElementById("userStats");
