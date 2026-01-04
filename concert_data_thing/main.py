@@ -291,13 +291,15 @@ def analyze_concert_csv(
     # Add QUALIFIED_NAME: EVENT_NAME if present (takes priority), otherwise headliner artist (fallback)
     # First, determine headliner for each date and initialize QUALIFIED_NAME with headliner
     logger.debug("Determining headliners for each date")
-    headliner_by_date = {}
+    headliner_by_id = {}
+    i = 0
     for date_val, day_df in df.groupby(DATE):
         target_index = -1 if running_order_headline_last else 0
         headliner = determine_headliner_for_day(day_df, festival_label, headline_label, target_index)
-        headliner_by_date[date_val] = headliner
+        headliner_by_id[i] = headliner
+        i += 1
 
-    if len(headliner_by_date) == 0:
+    if len(headliner_by_id) == 0:
         raise HTTPException(
             400,
             f"Parsing of data failed (no valid row found). "
@@ -305,8 +307,11 @@ def analyze_concert_csv(
             f"Other issues could be: Invalid data in the Artist, Type or Venue columns.",
         )
 
+    # Assign batch_id to each row based on date grouping
+    df["batch_id"] = df.groupby(DATE).ngroup()
+
     # Initialize QUALIFIED_NAME with headliner for all rows
-    df[QUALIFIED_NAME] = df[DATE].map(headliner_by_date)
+    df[QUALIFIED_NAME] = df["batch_id"].map(headliner_by_id)
 
     # Overwrite with EVENT_NAME where EVENT_NAME is not empty
     event_name_mask = df[EVENT_NAME].notna()
@@ -317,14 +322,14 @@ def analyze_concert_csv(
 
     df = select_rows_by_year(df, filter_year)
 
-    # Create a MultiIndex DataFrame with date as first index and a second index (0..N) per date
+    # Create a MultiIndex DataFrame with batch_id as first index and a second index (0..N) per batch
     df_indexed = df.copy()
 
-    # Group by date and assign a second index from 0..N for each date
-    df_indexed["per_day_idx"] = df_indexed.groupby(DATE).cumcount()
-    df_indexed = df_indexed.set_index([DATE, "per_day_idx"])
-    unique_dates = len(df_indexed.index.get_level_values(0).unique())
-    logger.info(f"Created indexed DataFrame with {unique_dates} unique dates, {len(df_indexed)} total entries")
+    # Group by batch_id and assign a second index from 0..N for each batch
+    df_indexed["per_day_idx"] = df_indexed.groupby("batch_id").cumcount()
+    df_indexed = df_indexed.set_index(["batch_id", "per_day_idx"])
+    unique_batches = len(df_indexed.index.get_level_values(0).unique())
+    logger.info(f"Created indexed DataFrame with {unique_batches} unique batches, {len(df_indexed)} total entries")
 
     meta_info = MetaInfo(user_name=user_name, year=filter_year)
 
@@ -406,15 +411,15 @@ def collect_data_for_user_analysis(
     days where TYPE equals festival_label and VENUE is the same.
     """
     logger.debug(f"Collecting user-level analysis data with festival_label={festival_label}")
+    # Reset index to work with dates as a column
+    df_reset = df_indexed.reset_index()
+    
     # Count unique days with shows
-    unique_dates = df_indexed.index.get_level_values(0).unique()
+    unique_dates = df_reset[DATE].unique()
     days_with_show = len(unique_dates)
 
     # Count total sets seen (total number of entries)
     sets_seen = len(df_indexed)
-
-    # Reset index to work with dates as a column
-    df_reset = df_indexed.reset_index()
 
     # Aggregate by date: one row per day (one venue per day)
     df_daily = (
@@ -537,8 +542,10 @@ def high_level_user_analysis(
         df_indexed, running_order_headline_last, festival_label=festival_label
     )
 
-    # Count how many entries there are per day on the index
-    entries_per_day = df_indexed.groupby(level=0).size()
+    # Count how many entries there are per day
+    # Reset index to access DATE column, group by DATE to get entries per day
+    df_reset_calendar = df_indexed.reset_index()
+    entries_per_day = df_reset_calendar.groupby(DATE).size()
     entries_per_day = np.log(entries_per_day)
 
     logger.debug(f"Creating calendar visualization for {len(entries_per_day)} days")
@@ -718,16 +725,18 @@ def collect_data_for_venue_like(
     # Collect all ticket prices for this venue
     prices = venue_df[PAID_PRICE].dropna().tolist()
 
-    # Group by date to get unique visit dates and count bands per night
+    # Group by batch_id to get unique visit dates and count bands per night
     visit_dates = []
     num_bands_per_night = []
     headline_per_night = []
     prices = []
 
-    for day, group in venue_df.groupby(level=0):  # level=0 is DATE
+    for batch_id, group in venue_df.groupby(level=0):  # level=0 is batch_id
         if venue not in group[column].values:
             continue
 
+        # Get the date from the DATE column (should be same for all rows in a batch)
+        day = group[DATE].iloc[0]
         visit_dates.append(day)
 
         headline_per_night.append(group[QUALIFIED_NAME].iloc[0])
@@ -797,7 +806,9 @@ def collect_data_for_artist(
     # Collect unique visit dates for this artist and headline_per_night
     visit_dates = []
     headline_per_night = []
-    for day, group in artist_df.groupby(level=0):  # level=0 is DATE
+    for batch_id, group in artist_df.groupby(level=0):  # level=0 is batch_id
+        # Get the date from the DATE column (should be same for all rows in a batch)
+        day = group[DATE].iloc[0]
         visit_dates.append(day)
         headline_per_night.append(group[QUALIFIED_NAME].iloc[0])
 
@@ -831,10 +842,13 @@ def get_concert_types_for_artist(
 
     classification_for_day = []
 
-    for day, group in df.groupby(level=0):  # level=0 is DATE
+    for batch_id, group in df.groupby(level=0):  # level=0 is batch_id
 
         if artist not in group[ARTIST].values:
             continue
+
+        # Get the date from the DATE column (should be same for all rows in a batch)
+        day = group[DATE].iloc[0]
 
         # Check festival first (always uses TYPE column)
         type_value = group.loc[group[ARTIST] == artist, TYPE].iloc[0]
