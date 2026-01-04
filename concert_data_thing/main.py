@@ -801,7 +801,10 @@ def collect_data_for_artist(
 
     headliner_bool_array = show_classification_per_date["is_headliner"].to_numpy(dtype=int).tolist()
 
+    # All rows of the artist
     artist_df = df[df[ARTIST] == artist]
+    # Get all rows whose first level index matches the indices in artist_df (i.e., the batch_ids this artist was at)
+    all_artist_related_rows = df[df.index.get_level_values(0).isin(artist_df.index.get_level_values(0))]
 
     # Collect all venues this artist was seen in and save in a list called venues
     venues = artist_df[VENUE].dropna().tolist()
@@ -810,7 +813,10 @@ def collect_data_for_artist(
     countries = artist_df[COUNTRY].dropna().tolist()
 
     # Collect all ticket prices this artist was seen in and save in a list called prices
-    prices = artist_df[PAID_PRICE].dropna().tolist()
+    # Query the full related dataframe, take the max paid price per index (some ppl only enter price for headliner)
+    # We already have a multi-index, so we can use .max(level=0) directly to get max per batch_id
+    # Group by the first level of the multi-index (batch_id), then take the max per group, then tolist
+    prices = all_artist_related_rows[PAID_PRICE].dropna().groupby(level=0).max().tolist()
 
     cities = artist_df[CITY].dropna().tolist()
 
