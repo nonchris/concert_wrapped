@@ -862,12 +862,12 @@ def get_concert_types_for_artist(
         day = group[DATE].iloc[0]
 
         # Check festival first (always uses TYPE column)
-        row = group.loc[group[ARTIST] == artist].iloc[0]
+        type_val = group.loc[group[ARTIST] == artist, TYPE].iloc[0]
 
         headliner = determine_headliner_for_day(group, festival_label, headline_label, target_index)
 
         # Festival stays festival
-        if len(query_for_label(row, festival_label)) > 0:
+        if festival_label in type_val:
             classification_for_day.append((day, TopBandContext.TYPE_FESTIVAL))
         # Headliner is the artist
         elif headliner == artist:
