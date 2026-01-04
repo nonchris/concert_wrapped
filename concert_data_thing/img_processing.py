@@ -357,6 +357,12 @@ class MetaInfo(MarkerDrivenBaseModel):
 class UserAnalysis(MarkerDrivenBaseModel):
     related_svg_solo_export: ClassVar[Path] = images_path / "user-high-level.svg"
 
+    marker_unique_events: ClassVar[str] = "Cs"
+    unique_events: int
+
+    marker_unique_events_wo_festival: ClassVar[str] = "Cso"
+    unique_events_wo_festival: int
+
     marker_days_with_show: ClassVar[str] = "Ds"
     days_with_show: int
 

@@ -419,23 +419,29 @@ def collect_data_for_user_analysis(
     """
     Collect user-level analysis data from the DataFrame.
 
+    Uses batch_id for most statistics (concerts/shows) but keeps unique dates
+    for day count metrics (used for dayplot visualization).
     Handles multi-day festivals by only counting ticket cost once for sequential
     days where TYPE equals festival_label and VENUE is the same.
     """
     logger.debug(f"Collecting user-level analysis data with festival_label={festival_label}")
-    # Reset index to work with dates as a column
+    # Reset index to work with dates and batch_id as columns
     df_reset = df_indexed.reset_index()
 
-    # Count unique days with shows
+    # Count unique days with shows (for day count and dayplot)
     unique_dates = df_reset[DATE].unique()
     days_with_show = len(unique_dates)
+
+    # Count unique concerts/shows (using batch_id)
+    unique_batches = df_reset["batch_id"].unique()
+    unique_concerts = len(unique_batches)
 
     # Count total sets seen (total number of entries)
     sets_seen = len(df_indexed)
 
-    # Aggregate by date: one row per day (one venue per day)
-    df_daily = (
-        df_reset.groupby(DATE)
+    # Aggregate by batch_id: one row per concert/show
+    df_batch = (
+        df_reset.groupby("batch_id")
         .agg(
             {
                 # max bc some ppl only enter the price on one artist per night (the headline one)
@@ -444,21 +450,35 @@ def collect_data_for_user_analysis(
                 VENUE: "first",
                 ARTIST: "last" if running_order_headline_last else "first",
                 QUALIFIED_NAME: "first",
+                DATE: "first",  # Get the date for this batch
             }
         )
         .reset_index()
     )
-    df_daily.columns = [DATE, "price", "is_festival", VENUE, ARTIST, QUALIFIED_NAME]
-    df_daily = df_daily.sort_values(DATE)
+    df_batch.columns = ["batch_id", "price", "is_festival", VENUE, ARTIST, QUALIFIED_NAME, DATE]
+    df_batch = df_batch.sort_values(DATE)
 
-    # Count days without festivals
+    # Aggregate by date for day count metrics (days_with_show_wo_festival)
+    df_daily = (
+        df_reset.groupby(DATE)
+        .agg(
+            {
+                TYPE: lambda x: (x == festival_label).any(),
+            }
+        )
+        .reset_index()
+    )
+    df_daily.columns = [DATE, "is_festival"]
     days_with_show_wo_festival = len(df_daily[~df_daily["is_festival"]])
+
+    # unique batches without festivals
+    unique_batches_wo_festival = len(df_batch[~df_batch["is_festival"]]["batch_id"].unique())
 
     # Determine include_in_sum: False for consecutive festival days (same venue)
     last_festival_date_by_venue = {}
-    df_daily["include_in_sum"] = True
+    df_batch["include_in_sum"] = True
 
-    for idx, row in df_daily.iterrows():
+    for idx, row in df_batch.iterrows():
         date = row[DATE]
         qualified_name = row[QUALIFIED_NAME]
         is_festival = row["is_festival"]
@@ -466,28 +486,27 @@ def collect_data_for_user_analysis(
         if is_festival and qualified_name in last_festival_date_by_venue:
             last_festival_date = last_festival_date_by_venue[qualified_name]
             if (date - last_festival_date).days >= 1:
-                df_daily.at[idx, "include_in_sum"] = False
+                df_batch.at[idx, "include_in_sum"] = False
 
         if is_festival:
             last_festival_date_by_venue[qualified_name] = date
         elif qualified_name in last_festival_date_by_venue:
             del last_festival_date_by_venue[qualified_name]
 
-    total_ticket_cost = df_daily[df_daily["include_in_sum"]]["price"].sum()
+    total_ticket_cost = df_batch[df_batch["include_in_sum"]]["price"].sum()
 
     # Calculate total ticket cost without festivals
-    df_no_festival = df_daily[~df_daily["is_festival"]]
+    df_no_festival = df_batch[~df_batch["is_festival"]]
     total_ticket_cost_wo_festival = df_no_festival["price"].sum()
 
     # Find most expensive ticket
-    most_expensive, most_expensive_show = find_most_expensive_ticket(df_daily)
+    most_expensive, most_expensive_show = find_most_expensive_ticket(df_batch)
 
     # Find most expensive ticket without festivals
     most_expensive_wo_festival, most_expensive_show_wo_festival = find_most_expensive_ticket(df_no_festival)
 
-    # Calculate mean ticket costs
-    # Mean with festivals: total cost (festivals counted once) / total days (all festival days included)
-    mean_ticket_cost = round(df_daily[df_daily["include_in_sum"]]["price"].mean(), 2) if len(df_daily) > 0 else 0.0
+    # Calculate mean ticket costs (using batch_id aggregation)
+    mean_ticket_cost = round(df_batch[df_batch["include_in_sum"]]["price"].mean(), 2) if len(df_batch) > 0 else 0.0
     mean_ticket_cost_wo_festival = round(df_no_festival["price"].mean(), 2) if len(df_no_festival) > 0 else 0.0
 
     # Calculate price per set
@@ -498,7 +517,7 @@ def collect_data_for_user_analysis(
     )
 
     # Calculate total festival cost (festivals counted once for multi-day festivals)
-    df_festivals = df_daily[(df_daily["is_festival"]) & (df_daily["include_in_sum"])]
+    df_festivals = df_batch[(df_batch["is_festival"]) & (df_batch["include_in_sum"])]
     total_festival_cost = df_festivals["price"].sum()
 
     # total countries
@@ -508,12 +527,14 @@ def collect_data_for_user_analysis(
     total_artists = len(df_reset[ARTIST].dropna().unique())
 
     logger.info(
-        f"User analysis summary: {days_with_show} days, {sets_seen} sets, "
+        f"User analysis summary: {days_with_show} days, {unique_concerts} concerts, {sets_seen} sets, "
         f"€{total_ticket_cost:.2f} total cost, {total_artists} artists, {total_venues} venues, "
         f"{total_cities} cities, {total_countries} countries"
     )
 
     return UserAnalysis(
+        unique_events=unique_concerts,
+        unique_events_wo_festival=unique_batches_wo_festival,
         days_with_show=days_with_show,
         days_with_show_wo_festival=days_with_show_wo_festival,
         sets_seen=sets_seen,
