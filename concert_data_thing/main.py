@@ -28,6 +28,7 @@ from concert_data_thing.constants import QUALIFIED_NAME
 from concert_data_thing.constants import TYPE
 from concert_data_thing.constants import VENUE
 from concert_data_thing.data_models.settings import SVGStyleGuide
+from concert_data_thing.helpers.color import moderate_color
 from concert_data_thing.helpers.deduplication import split_day_into_batches
 from concert_data_thing.img_processing import BandSeenSetSummary
 from concert_data_thing.img_processing import MarkerDrivenBaseModel
@@ -568,7 +569,14 @@ def high_level_user_analysis(
         start_date=f"{meta_info.year}-01-01",
         end_date=f"{meta_info.year}-12-31",
         ax=ax,
-        cmap=LinearSegmentedColormap.from_list("my_cmap", [color_scheme.gradient_high, color_scheme.text_color]),
+        color_for_none=moderate_color(color_scheme.gradient_low, saturation_factor=0.5, brightness_factor=0.5),
+        cmap=LinearSegmentedColormap.from_list(
+            "my_cmap",
+            [
+                moderate_color(color_scheme.text_color, brightness_factor=0.1, saturation_factor=0.1),
+                color_scheme.text_color,
+            ],
+        ),
         day_kws={"color": color_scheme.text_color},
         month_kws={"color": color_scheme.text_color},
     )
