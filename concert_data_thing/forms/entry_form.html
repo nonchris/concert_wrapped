@@ -395,15 +395,26 @@
                 <div class="form-group">
                     <label for="paid_price">Paid Price Column</label>
                     <input type="text" id="paid_price" name="paid_price" value="Bezahlt Preis" placeholder="Bezahlt Preis">
+                    <div class="help-text">
+                        The max value per concert is extracted, empty fields are filled with zeros.<br>
+                        So you can either enter the price in each row or in only one row per concert.<br>
+                        Entering it per row makes the system slighly more robust in some edge-cases.<br>
+                        <br>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="type">Type Column</label>
                     <input type="text" id="type" name="type" value="Typ" placeholder="Typ">
                     <div class="help-text">
-                        Column labeling what type of show a row is (headline, support, festival).<br>
+                        One column labeling if a show is a concert or a festival.<br>
+                        This column is also used to detect which artist was the headliner of the night.<br>
+                        For festivals the venue name is used as 'headliner' if no Event Name (see 'Event Name Column') is provided.<br>
                         There are two modes available to detect whether an entry is a headline, support show:<br>
-                        Order the rows (per date) in a way that the headliner is always the first or last entry and declare type binary (festival, not festival).<br>
-                        Provide a more sophisticated column to declare it using three labels instead of two ('franka-style'), for festivals the venue name is used as 'headliner' if no Event Name is provided.
+                        1. Order the rows (per date) in a way that the headliner is always the first or last entry of a date, the values of this column are then binary (festival, not festival).<br>
+                        (To use this mode, provide the value of the festival label and set the other two values to "auto").<br>
+                        2. Provide a more sophisticated column to declare it using three labels instead of two ('franka-style').
+                        The order may still be used in some edge-cases e.g. if the same artist plays the same venue multple times at the same day.<br>
+                        <br>
                     </div>
                     <div style="display: flex; gap: 10px; margin-top: 10px;">
                         <div style="flex: 1;">
