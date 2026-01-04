@@ -862,12 +862,12 @@ def get_concert_types_for_artist(
         day = group[DATE].iloc[0]
 
         # Check festival first (always uses TYPE column)
-        type_value = group.loc[group[ARTIST] == artist, TYPE].iloc[0]
+        row = group.loc[group[ARTIST] == artist].iloc[0]
 
         headliner = determine_headliner_for_day(group, festival_label, headline_label, target_index)
 
         # Festival stays festival
-        if type_value == festival_label:
+        if len(query_for_label(row, festival_label)) > 0:
             classification_for_day.append((day, TopBandContext.TYPE_FESTIVAL))
         # Headliner is the artist
         elif headliner == artist:
@@ -879,6 +879,10 @@ def get_concert_types_for_artist(
     return classification_for_day
 
 
+def query_for_label(group: DataFrame, label: str, target_col: str = TYPE) -> DataFrame:
+    return group.loc[group[target_col].str.contains(label, na=False)]
+
+
 def determine_headliner_for_day(group: DataFrame, festival_label: str, headline_label: str, target_index: int) -> str:
 
     # detect by running order
@@ -887,14 +891,14 @@ def determine_headliner_for_day(group: DataFrame, festival_label: str, headline_
 
     # detect by festival label (choose venue as headliner, since we can't determine the headliner from the festival label alone)
     # we use contains since Franka has multiple labels for headline slots in festivals (e.g. "Festival, Main Act")
-    elif len(group.loc[group[TYPE].str.contains(festival_label, na=False)]) > 0:
+    elif len(query_for_label(group, festival_label)) > 0:
         return group.iloc[target_index][VENUE]
 
     # detect by headline label (choose the headliner from the headline label)
     else:
         # We need those rows of 'TYPE' where 'headline_label' is in the type string
         # reason for conatins at elif above
-        return group.loc[group[TYPE].str.contains(headline_label, na=False)][ARTIST].iloc[0]
+        return query_for_label(group, headline_label)[ARTIST].iloc[0]
 
 
 context_collectors: dict[str, tuple[Callable, Callable]] = {
