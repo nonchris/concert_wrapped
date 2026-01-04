@@ -16,7 +16,19 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 from pandas import DataFrame
 
+from concert_data_thing.constants import ARTIST
+from concert_data_thing.constants import CITY
+from concert_data_thing.constants import COUNTRY
+from concert_data_thing.constants import DATE
+from concert_data_thing.constants import EVENT_NAME
+from concert_data_thing.constants import MERCH_COST
+from concert_data_thing.constants import ORIGINAL_PRICE
+from concert_data_thing.constants import PAID_PRICE
+from concert_data_thing.constants import QUALIFIED_NAME
+from concert_data_thing.constants import TYPE
+from concert_data_thing.constants import VENUE
 from concert_data_thing.data_models.settings import SVGStyleGuide
+from concert_data_thing.helpers.deduplication import split_day_into_batches
 from concert_data_thing.img_processing import BandSeenSetSummary
 from concert_data_thing.img_processing import MarkerDrivenBaseModel
 from concert_data_thing.img_processing import MetaInfo
@@ -29,17 +41,6 @@ from concert_data_thing.logger import LOGGING_PROVIDER
 logger = LOGGING_PROVIDER.new_logger("concert_data_thing.main")
 
 # Global constants for DataFrame column names
-DATE = "date"
-ARTIST = "artist"
-VENUE = "venue"
-CITY = "city"
-COUNTRY = "country"
-PAID_PRICE = "paid_price"
-ORIGINAL_PRICE = "original_price"
-MERCH_COST = "merch_cost"
-TYPE = "type"
-EVENT_NAME = "event_name"
-QUALIFIED_NAME = "qualified_name"
 
 
 def parse_concert_csv(
@@ -289,15 +290,25 @@ def analyze_concert_csv(
     )
 
     # Add QUALIFIED_NAME: EVENT_NAME if present (takes priority), otherwise headliner artist (fallback)
-    # First, determine headliner for each date and initialize QUALIFIED_NAME with headliner
-    logger.debug("Determining headliners for each date")
+    # First, determine headliner for each batch and initialize QUALIFIED_NAME with headliner
+    logger.debug("Determining headliners for each batch")
     headliner_by_id = {}
+    batch_id_list = []
     i = 0
+
     for date_val, day_df in df.groupby(DATE):
-        target_index = -1 if running_order_headline_last else 0
-        headliner = determine_headliner_for_day(day_df, festival_label, headline_label, target_index)
-        headliner_by_id[i] = headliner
-        i += 1
+        # Split day into batches if ARTIST values are not unique
+        batches = split_day_into_batches(day_df, headline_label)
+
+        for batch_df in batches:
+            target_index = -1 if running_order_headline_last else 0
+            headliner = determine_headliner_for_day(batch_df, festival_label, headline_label, target_index)
+            headliner_by_id[i] = headliner
+
+            # Assign batch_id to each row in this batch
+            batch_df["batch_id"] = i
+            batch_id_list.append(batch_df)
+            i += 1
 
     if len(headliner_by_id) == 0:
         raise HTTPException(
@@ -307,8 +318,8 @@ def analyze_concert_csv(
             f"Other issues could be: Invalid data in the Artist, Type or Venue columns.",
         )
 
-    # Assign batch_id to each row based on date grouping
-    df["batch_id"] = df.groupby(DATE).ngroup()
+    # Reconstruct DataFrame with batch_id assigned
+    df = pd.concat(batch_id_list, ignore_index=True)
 
     # Initialize QUALIFIED_NAME with headliner for all rows
     df[QUALIFIED_NAME] = df["batch_id"].map(headliner_by_id)
@@ -413,7 +424,7 @@ def collect_data_for_user_analysis(
     logger.debug(f"Collecting user-level analysis data with festival_label={festival_label}")
     # Reset index to work with dates as a column
     df_reset = df_indexed.reset_index()
-    
+
     # Count unique days with shows
     unique_dates = df_reset[DATE].unique()
     days_with_show = len(unique_dates)
