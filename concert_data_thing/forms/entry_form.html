@@ -17,6 +17,7 @@
             --color-border: #474747;
             --color-error: #ff4444;
             --color-button-text: #000000;
+            --color-link: #948500;
         }
         * {
             margin: 0;
@@ -88,6 +89,14 @@
             font-size: 12px;
             color: var(--color-text-secondary);
             margin-top: 4px;
+        }
+        a {
+            color: var(--color-link);
+            text-decoration: none;
+        }
+        a:hover {
+            color: var(--color-primary-hover);
+            text-decoration: underline;
         }
         button {
             background-color: var(--color-primary);
@@ -353,7 +362,7 @@
                         It is important that the data you provide is complete for all columns listed below (for the year you want to have analyzed).<br>
                         Your data may have additional columns, they will not affect the process.<br>
                         Empty rows are no problem as well.<br>
-                        You can find an example CSV <a href="/api/v1/example-data">here</a>.
+                        Here you can find an example CSVs: <a href="/api/v1/example-chris" target="_blank" rel="noopener">'Chris-Style'</a>, <a href="/api/v1/example-franka" target="_blank" rel="noopener">'Franka-Style'</a>. You can quickly preview a CSV using tools like <a href="https://convertcsv.com/csv-viewer-editor.htm" target="_blank" rel="noopener">convertcsv.com</a>.
                         <br><br>
                         Missing data in nummerical columns is treated as 0, this will likely affect the analysis.
                         <br><br>
