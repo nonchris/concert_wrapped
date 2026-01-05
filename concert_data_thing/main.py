@@ -745,7 +745,7 @@ def create_svgs_for(
 
 
 def sanitize_filename(name):
-    return re.sub(r"[^a-zA-Z0-9_-]", "", name)
+    return re.sub(r"[^a-zA-Z0-9_\- äöüÄÖÜß.]", "", name)
 
 
 def collect_data_for_venue_like(
