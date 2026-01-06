@@ -1,12 +1,14 @@
 """Garbage collector for cleaning up old artifact folders."""
 
-import os
 import shutil
 import time
 from datetime import timedelta
 from pathlib import Path
 from threading import Event
 
+from concert_data_thing.evnironment import ARTIFACTS_PATH
+from concert_data_thing.evnironment import GC_INTERVAL_MINUTES
+from concert_data_thing.evnironment import GC_MAX_AGE_HOURS
 from concert_data_thing.logger import LOGGING_PROVIDER
 
 logger = LOGGING_PROVIDER.new_logger("concert_data_thing.garbage_collector")
@@ -21,7 +23,7 @@ def cleanup_old_folders(artifacts_folder: Path, max_age_hours: int | None = None
         max_age_hours: Maximum age in hours before a folder is deleted. If None, reads from GC_MAX_AGE_HOURS env var (default: 24).
     """
     if max_age_hours is None:
-        max_age_hours = int(os.environ.get("GC_MAX_AGE_HOURS", "24"))
+        max_age_hours = GC_MAX_AGE_HOURS
     if not artifacts_folder.exists():
         logger.debug(f"Artifacts folder does not exist: {artifacts_folder}")
         return
@@ -81,16 +83,15 @@ def run_garbage_collector_loop(stop_event: Event, interval_minutes: int | None =
     stop_event.wait(timeout=60)
 
     if interval_minutes is None:
-        interval_minutes = int(os.environ.get("GC_INTERVAL_MINUTES", "10"))
+        interval_minutes = GC_INTERVAL_MINUTES
 
-    artifacts_path = os.environ.get("ARTIFACTS_PATH", "out")
-    artifacts_folder = Path(artifacts_path)
+    artifacts_folder = Path(ARTIFACTS_PATH)
 
-    max_age_hours = int(os.environ.get("GC_MAX_AGE_HOURS", "24"))
+    max_age_hours = GC_MAX_AGE_HOURS
 
-    logger.info(f"GC_INTERVAL_MINUTES: {interval_minutes}")
-    logger.info(f"GC_MAX_AGE_HOURS: {max_age_hours}")
-    logger.info(f"ARTIFACTS_PATH: {artifacts_path}")
+    logger.info(f"GC_INTERVAL_MINUTES: {GC_INTERVAL_MINUTES}")
+    logger.info(f"GC_MAX_AGE_HOURS: {GC_MAX_AGE_HOURS}")
+    logger.info(f"ARTIFACTS_PATH: {ARTIFACTS_PATH}")
 
     logger.info(
         f"Starting garbage collector thread (interval: {interval_minutes} minutes, "

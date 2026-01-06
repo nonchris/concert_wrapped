@@ -1,6 +1,5 @@
 import datetime
 import io
-import os
 import re
 import uuid
 from collections import defaultdict
@@ -28,6 +27,7 @@ from concert_data_thing.constants import QUALIFIED_NAME
 from concert_data_thing.constants import TYPE
 from concert_data_thing.constants import VENUE
 from concert_data_thing.data_models.settings import SVGStyleGuide
+from concert_data_thing.evnironment import ARTIFACTS_PATH
 from concert_data_thing.helpers.color import moderate_color
 from concert_data_thing.helpers.deduplication import split_day_into_batches
 from concert_data_thing.img_processing import BandSeenSetSummary
@@ -346,7 +346,6 @@ def analyze_concert_csv(
     meta_info = MetaInfo(user_name=user_name, year=filter_year)
 
     # TODO: later use coockies to store the request_id (basically reclide uuids)
-    ARTIFACTS_PATH = os.environ.get("ARTIFACTS_PATH", "out")
     user_data_folder = Path(f"{ARTIFACTS_PATH}/user_data_{request_id}")
     user_data_folder.mkdir(parents=True, exist_ok=True)
 

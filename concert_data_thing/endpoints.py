@@ -1,7 +1,6 @@
 """FastAPI application entry point."""
 
 import io
-import os
 import uuid
 import zipfile
 from contextlib import asynccontextmanager
@@ -23,6 +22,9 @@ from fastapi.security import HTTPBasicCredentials
 from pydantic import BaseModel
 
 from concert_data_thing.data_models.settings import SVGStyleGuide
+from concert_data_thing.evnironment import API_PORT
+from concert_data_thing.evnironment import BASIC_AUTH_PASSWORD
+from concert_data_thing.evnironment import BASIC_AUTH_USERNAME
 from concert_data_thing.garbage_collector import run_garbage_collector_loop
 from concert_data_thing.logger import LOGGING_PROVIDER
 from concert_data_thing.main import analyze_concert_csv
@@ -30,8 +32,6 @@ from concert_data_thing.main import analyze_concert_csv
 logger = LOGGING_PROVIDER.new_logger("concert_data_thing.endpoints")
 
 # Basic Auth configuration from environment variables
-BASIC_AUTH_USERNAME = os.getenv("BASIC_AUTH_USERNAME", None)
-BASIC_AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD", None)
 BASIC_AUTH_ENABLED = bool(BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD)
 
 static_folder = Path(__file__).resolve().parent / "forms"
@@ -358,7 +358,7 @@ def main():
     """Entry point for CLI."""
     import uvicorn
 
-    uvicorn.run("concert_data_thing.endpoints:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("concert_data_thing.endpoints:app", host="0.0.0.0", port=API_PORT, reload=True)
 
 
 if __name__ == "__main__":
@@ -369,5 +369,5 @@ if __name__ == "__main__":
         reload=True,
         reload_dirs=[str(Path(__file__).parent)],
         host="0.0.0.0",
-        port=8000,
+        port=API_PORT,
     )

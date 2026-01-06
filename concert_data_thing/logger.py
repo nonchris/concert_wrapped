@@ -7,12 +7,13 @@ the logging provider works in (relative) isolation.
 
 import datetime
 import logging
-import os
 import sys
 import types
 from pathlib import Path
 
 from pydantic import BaseModel
+
+from concert_data_thing.evnironment import LOG_DIR
 
 
 class InitializedProviderState(BaseModel):
@@ -103,7 +104,8 @@ class LoggingProvider:
 
         # create log dir
         if log_dir is None:
-            log_dir = os.getenv("LOG_DIR")
+            log_dir = LOG_DIR
+        log_dir = Path(log_dir)
         log_dir.mkdir(parents=True, exist_ok=True)
 
         self._initialized = InitializedProviderState(log_dir=log_dir)
