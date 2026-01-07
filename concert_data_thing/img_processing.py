@@ -38,6 +38,8 @@ class MarkerDrivenBaseModel(BaseModel):
 
             text = text.replace(k, str(v))
 
+        text = self._apply_more(text)
+
         return text
 
     @staticmethod
@@ -47,6 +49,63 @@ class MarkerDrivenBaseModel(BaseModel):
     def key_processor(self, k: str, is_ranked: bool):
         """call to replace_lq_gt() by default"""
         return self.replace_lq_gt(k)
+
+    def _apply_more(self, text: str):
+        """Apply additional text replacements using batched items if available."""
+        batched_items = self._get_batched_items()
+        batched_marker = self._get_batched_marker()
+        if batched_items is not None and batched_marker is not None:
+            groups = self.group_create_lineup_like(batched_items)
+            for index, group in enumerate(groups, start=1):
+                processed_marker = self.key_processor(batched_marker, is_ranked=False, index_string=str(index))
+                text = text.replace(processed_marker, group)
+        return text
+
+    def _get_batched_items(self) -> list[str] | None:
+        """Return list of items to batch, or None if batching is not needed."""
+        return None
+
+    def _get_batched_marker(self) -> str | None:
+        """Return marker string for batched items, or None if batching is not needed."""
+        return None
+
+    @staticmethod
+    def group_create_lineup_like(items: list[str], n_groups: int = 5, max_len: int = 50) -> list[str]:
+
+        groups = []
+        current = items[0]
+
+        last_appended = 0
+        i = 0
+        for i, elm in enumerate(items[1:], start=0):
+            potential_next = f"{current}, {elm}"
+
+            # case that it fits just fine
+            if len(potential_next) < max_len:
+                current = potential_next
+                continue
+
+            # cases that we exceeded limit
+
+            # we have still lists left (flush and new one)
+            # we do no longer flush as soon as we reach the last one
+            if len(groups) < n_groups - 1:
+                groups.append(current)
+                current = elm
+                last_appended = i
+                continue
+
+            # we ran out of lists (append no matter what)
+            current = potential_next
+
+        # make sure we get the last indices (or the first one, if no flush ever happend.)
+        if last_appended < len(items) - 1 or last_appended == 0:
+            groups.append(current)
+
+        while len(groups) < n_groups:
+            groups.append("")
+
+        return groups
 
 
 class PriceAble(MarkerDrivenBaseModel):
@@ -106,10 +165,10 @@ class TopBandContext(PriceAble):
     def key(self):
         return self.headline_shows_count, self.total_cost
 
-    def key_processor(self, k: str, is_ranked: bool):
+    def key_processor(self, k: str, is_ranked: bool, index_string: str = "1"):
         if is_ranked:
             return self.replace_lq_gt(k.replace("x", str(self.position)))
-        return self.replace_lq_gt(k.replace("x", "1"))
+        return self.replace_lq_gt(k.replace("x", index_string))
 
     position: int | None
     """ranking of the band"""
@@ -156,6 +215,14 @@ class TopBandContext(PriceAble):
     @property
     def venues_at_dates_formatted(self):
         return ", ".join(f"{dt.strftime('%d.%m.%Y')}@{venue}" for dt, venue in zip(self.visit_dates, self.venues))
+
+    def _get_batched_items(self) -> list[str] | None:
+        """Return list of venue-date items to batch."""
+        return [f"{dt.strftime('%d.%m.%Y')}@{venue}" for dt, venue in zip(self.visit_dates, self.venues)]
+
+    def _get_batched_marker(self) -> str | None:
+        """Return marker string for batched venue-date items."""
+        return "Vdgx"
 
     visit_dates: list[dt.datetime]
 
@@ -238,10 +305,10 @@ class VenueContext(PriceAble):
     def key(self):
         return self.total_visits, self.total_sets, self.total_cost
 
-    def key_processor(self, k: str, is_ranked: bool):
+    def key_processor(self, k: str, is_ranked: bool, index_string: str = "1"):
         if is_ranked:
             return self.replace_lq_gt(k.replace("x", str(self.position)))
-        return self.replace_lq_gt(k.replace("x", str(1)))
+        return self.replace_lq_gt(k.replace("x", index_string))
 
     marker_name: ClassVar[str] = "Vx"
 
@@ -298,6 +365,14 @@ class VenueContext(PriceAble):
         return " - ".join(
             f"{dt.strftime('%d.%m.%Y')}, {artist}" for dt, artist in zip(self.visit_dates, self.headline_per_night)
         )
+
+    def _get_batched_items(self) -> list[str] | None:
+        """Return list of artist-date items to batch."""
+        return [f"{dt.strftime('%d.%m.%Y')}, {artist}" for dt, artist in zip(self.visit_dates, self.headline_per_night)]
+
+    def _get_batched_marker(self) -> str | None:
+        """Return marker string for batched artist-date items."""
+        return "Adgx"
 
 
 class VenueSummary(MarkerDrivenBaseModel):
