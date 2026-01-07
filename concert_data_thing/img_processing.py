@@ -157,6 +157,7 @@ class TopBandContext(PriceAble):
     TYPE_HEADLINE: ClassVar[int] = 1
     TYPE_SUPPORT: ClassVar[int] = 2
     TYPE_FESTIVAL: ClassVar[int] = 3
+    TYPE_FESTIVAL_HEADLINE: ClassVar[int] = 4
 
     related_svg_unique_top_4: ClassVar[Path] = images_path / "top4bands.svg"
 
@@ -198,7 +199,7 @@ class TopBandContext(PriceAble):
 
     @property
     def headline_shows_count(self) -> int:
-        return self._count_shows(self.TYPE_HEADLINE)
+        return self._count_shows(self.TYPE_HEADLINE) + self._count_shows(self.TYPE_FESTIVAL_HEADLINE)
 
     @property
     def festival_shows_count(self) -> int:

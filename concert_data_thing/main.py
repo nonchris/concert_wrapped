@@ -1,4 +1,3 @@
-import datetime
 import io
 import re
 import uuid
@@ -358,12 +357,18 @@ def analyze_concert_csv(
             artist = group.loc[idx, ARTIST]
             type_val = group.loc[idx, TYPE]
 
-            # Check festival first (always uses TYPE column)
-            # Match original logic: check if festival_label is in type_val (handles NaN by checking first)
-            if pd.notna(type_val) and festival_label in str(type_val):
+            # Check if it's a festival (always uses TYPE column)
+            is_festival = pd.notna(type_val) and festival_label in str(type_val)
+            is_headliner = headliner == artist
+
+            # Festival headline: festival AND headliner
+            if is_festival and is_headliner:
+                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_FESTIVAL_HEADLINE
+            # Festival (but not headliner)
+            elif is_festival:
                 df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_FESTIVAL
-            # Headliner is the artist
-            elif headliner == artist:
+            # Headliner (but not festival)
+            elif is_headliner:
                 df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_HEADLINE
             # Default to support if neither headline nor support label matched
             else:
@@ -869,7 +874,7 @@ def collect_data_for_artist(
     # Collect unique visit dates for this artist, headline_per_night, and type_classification
     visit_dates = []
     headline_per_night = []
-    headliner_bool_array = []
+    show_classification_array = []
     for batch_id, group in artist_df.groupby(level=0):  # level=0 is batch_id
         # Get the date from the DATE column (should be same for all rows in a batch)
         day = group[DATE].iloc[0]
@@ -877,21 +882,12 @@ def collect_data_for_artist(
         headline_per_night.append(group[QUALIFIED_NAME].iloc[0])
         # Get the type_classification for this artist in this batch (should be same for all rows of same artist in batch)
         classification = group[TYPE_CLASSIFICATION].iloc[0]
-        headliner_bool_array.append(classification)
-
-    headline_count = sum(1 for t in headliner_bool_array if t == TopBandContext.TYPE_HEADLINE)
-    festival_count = sum(1 for t in headliner_bool_array if t == TopBandContext.TYPE_FESTIVAL)
-    support_count = sum(1 for t in headliner_bool_array if t == TopBandContext.TYPE_SUPPORT)
-    logger.debug(
-        f"Artist {artist}: {len(visit_dates)} visits ({headline_count} headline, "
-        f"{festival_count} festival, {support_count} support), {len(venues)} venues, "
-        f"{len(countries)} countries, {len(cities)} cities"
-    )
+        show_classification_array.append(classification)
 
     context = TopBandContext(
         position=position_in_ranking,
         name=artist,
-        classified_sets=headliner_bool_array,
+        classified_sets=show_classification_array,
         venues=venues,
         cities=cities,
         countries=countries,
@@ -916,7 +912,7 @@ def determine_headliner_for_day(group: DataFrame, festival_label: str, headline_
     # detect by festival label (choose venue as headliner, since we can't determine the headliner from the festival label alone)
     # we use contains since Franka has multiple labels for headline slots in festivals (e.g. "Festival, Main Act")
     elif len(query_for_label(group, festival_label)) > 0:
-        return group.iloc[target_index][VENUE]
+        return group.iloc[target_index][ARTIST]
 
     # detect by headline label (choose the headliner from the headline label)
     else:
