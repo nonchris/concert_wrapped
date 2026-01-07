@@ -346,33 +346,7 @@ def analyze_concert_csv(
     # Classify each row with type_classification
     logger.debug("Classifying rows with type_classification")
     target_index = -1 if running_order_headline_last else 0
-    df_indexed[TYPE_CLASSIFICATION] = None
-
-    for batch_id, group in df_indexed.groupby(level=0):  # level=0 is batch_id
-        # Determine headliner for this batch
-        headliner = determine_headliner_for_day(group, festival_label, headline_label, target_index)
-
-        # Classify each row in the batch
-        for idx in group.index:
-            artist = group.loc[idx, ARTIST]
-            type_val = group.loc[idx, TYPE]
-
-            # Check if it's a festival (always uses TYPE column)
-            is_festival = pd.notna(type_val) and festival_label in str(type_val)
-            is_headliner = headliner == artist
-
-            # Festival headline: festival AND headliner
-            if is_festival and is_headliner:
-                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_FESTIVAL_HEADLINE
-            # Festival (but not headliner)
-            elif is_festival:
-                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_FESTIVAL
-            # Headliner (but not festival)
-            elif is_headliner:
-                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_HEADLINE
-            # Default to support if neither headline nor support label matched
-            else:
-                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_SUPPORT
+    classify_shows(df_indexed, headline_label, festival_label, target_index)
 
     logger.info(f"Classified {len(df_indexed)} rows with type_classification")
 
@@ -426,6 +400,36 @@ def analyze_concert_csv(
         "venue_svgs": venue_svgs,
         "city_svgs": city_svgs,
     }
+
+
+def classify_shows(df_indexed, headline_label: str, festival_label: str, target_index: int):
+    df_indexed[TYPE_CLASSIFICATION] = None
+
+    for batch_id, group in df_indexed.groupby(level=0):  # level=0 is batch_id
+        # Determine headliner for this batch
+        headliner = determine_headliner_for_day(group, festival_label, headline_label, target_index)
+
+        # Classify each row in the batch
+        for idx in group.index:
+            artist = group.loc[idx, ARTIST]
+            type_val = group.loc[idx, TYPE]
+
+            # Check if it's a festival (always uses TYPE column)
+            is_festival = pd.notna(type_val) and festival_label in str(type_val)
+            is_headliner = headliner == artist
+
+            # Festival headline: festival AND headliner
+            if is_festival and is_headliner:
+                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_FESTIVAL_HEADLINE
+            # Festival (but not headliner)
+            elif is_festival:
+                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_FESTIVAL
+            # Headliner (but not festival)
+            elif is_headliner:
+                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_HEADLINE
+            # Default to support if neither headline nor support label matched
+            else:
+                df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_SUPPORT
 
 
 def find_most_expensive_ticket(df: DataFrame) -> tuple[float, str]:
