@@ -325,6 +325,14 @@
             border-radius: 6px;
             margin-top: 20px;
         }
+        .footer {
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 40px;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            border-top: 1px solid var(--color-border);
+        }
     </style>
 </head>
 <body>
@@ -400,9 +408,9 @@
                     </div>
                     <div class="help-text">
                         Date column name (left) and how to interpret date format (right).<br>
-                        Examples: <code>%d.%m.%y</code> (e.g. 21.07.2025),
+                        Examples: <code>%d.%m.%y</code> (e.g. 21.07.25),
                         <code>%Y-%m-%d</code> (e.g. 2025-07-21).<br>
-                        Refer to Python's strftime/strptime format codes for more options:
+                        Most important: "Y" = 2025, "y" = 25. Refer to Python's strftime/strptime format codes for more options:
                         <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes" target="_blank" rel="noopener">reference</a>.
                         <br><br>
                 </div>
@@ -1080,5 +1088,8 @@
             }
         })();
     </script>
+    <footer class="footer">
+        Copyright: Cyber Chris 2026 - Present
+    </footer>
 </body>
 </html>
