@@ -1,4 +1,4 @@
-# Concert Data Thing
+# Concert Wrapped
 
 A FastAPI-based web service that analyzes concert attendance data from CSV files and generates SVG visualizations.
 
