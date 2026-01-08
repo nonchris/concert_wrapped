@@ -487,7 +487,7 @@ def collect_data_for_user_analysis(
     total_ticket_cost = df_pricing[PAID_PRICE].sum()
 
     # Calculate total ticket cost without festivals
-    df_no_festival = df_pricing[~(df_pricing[TYPE] == festival_label)]
+    df_no_festival = df_pricing[~(get_festival_row_mask(df_indexed))]
     total_ticket_cost_wo_festival = df_no_festival[PAID_PRICE].sum()
 
     # Find most expensive ticket
@@ -502,7 +502,10 @@ def collect_data_for_user_analysis(
 
     # Calculate price per set
 
-    df_all_sets_wo_festival = df_indexed.loc[df_indexed.index.isin(df_no_festival.index)]
+    # Select all rows where the first level index matches those in df_no_festival
+    df_all_sets_wo_festival = df_indexed.loc[
+        df_indexed.index.get_level_values(0).isin(df_no_festival.index.get_level_values(0))
+    ]
     sets_wo_festival_cnt = len(df_all_sets_wo_festival)
     price_per_set = round(total_ticket_cost / sets_seen, 2) if sets_seen > 0 else 0.0
     price_per_set_wo_festival = (
@@ -534,8 +537,10 @@ def collect_data_for_user_analysis(
         sets_seen_wo_festival=sets_wo_festival_cnt,
         total_ticket_cost=round(total_ticket_cost, 2),
         total_ticket_cost_wo_festival=round(total_ticket_cost_wo_festival, 2),
-        most_expensive=round(most_expensive, 2),
-        most_expensive_show=most_expensive_show,
+        # TODO: for multi-day festivals the prices are NOT summed up, so this doesn't work rn
+        #  hence it is most likely equivalent to marker_most_expensive_wo_festival (hence deactivated)
+        # most_expensive=round(most_expensive, 2),
+        # most_expensive_show=most_expensive_show,
         most_expensive_wo_festival=round(most_expensive_wo_festival, 2),
         most_expensive_show_wo_festival=most_expensive_show_wo_festival,
         mean_ticket_cost=mean_ticket_cost,
