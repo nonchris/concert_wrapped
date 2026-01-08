@@ -610,6 +610,7 @@ def high_level_user_analysis(
         ),
         day_kws={"color": color_scheme.text_color},
         month_kws={"color": color_scheme.text_color},
+        week_starts_on="Monday",
     )
 
     # Set calendar background to transparent
