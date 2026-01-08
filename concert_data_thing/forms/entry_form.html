@@ -436,7 +436,7 @@
                     <div class="help-text">
                         The max value per concert is extracted, empty fields are filled with zeros.<br>
                         So you can either enter the price in each row or in only one row per concert.<br>
-                        Entering it per row makes the system slighly more robust in some edge-cases.<br>
+                        For multi-day festivals divide the total price by the number of days and enter it per day.<br>
                         <br>
                     </div>
                 </div>
@@ -446,7 +446,7 @@
                     <div class="help-text">
                         One column labeling if a show is a concert or a festival.<br>
                         This column is also used to detect which artist was the headliner of the night.<br>
-                        For festivals the venue name is used as 'headliner' if no Event Name (see 'Event Name Column') is provided.<br>
+                        For festivals the headline artist name is used as 'headliner' if no Event Name (see 'Event Name Column') is provided.<br>
                         There are two modes available to detect whether an entry is a headline, support show:<br>
                         1. Order the rows (per date) in a way that the headliner is always the first or last entry of a date, the values of this column are then binary (festival, not festival).<br>
                         (To use this mode, provide the value of the festival label and set the other two values to "auto").<br>
