@@ -19,6 +19,7 @@ from concert_data_thing.constants import CITY
 from concert_data_thing.constants import COUNTRY
 from concert_data_thing.constants import DATE
 from concert_data_thing.constants import EVENT_NAME
+from concert_data_thing.constants import INCLUDE_IN_PRICE
 from concert_data_thing.constants import MERCH_COST
 from concert_data_thing.constants import ORIGINAL_PRICE
 from concert_data_thing.constants import PAID_PRICE
@@ -348,6 +349,12 @@ def analyze_concert_csv(
     target_index = -1 if running_order_headline_last else 0
     classify_shows(df_indexed, headline_label, festival_label, target_index)
 
+    # find headliners and attribute them
+    # TODO: this does not work when there is only a festival+headliner atm
+    #  in these cases we should go by the max of the batch id
+    df_indexed[INCLUDE_IN_PRICE] = False
+    df_indexed.loc[get_headline_rows_mask(df_indexed), INCLUDE_IN_PRICE] = True
+
     logger.info(f"Classified {len(df_indexed)} rows with type_classification")
 
     meta_info = MetaInfo(user_name=user_name, year=filter_year)
@@ -432,17 +439,17 @@ def classify_shows(df_indexed, headline_label: str, festival_label: str, target_
                 df_indexed.loc[idx, TYPE_CLASSIFICATION] = TopBandContext.TYPE_SUPPORT
 
 
-def find_most_expensive_ticket(df: DataFrame) -> tuple[float, str]:
+def find_most_expensive_ticket(df: DataFrame, key: str) -> tuple[float, str]:
     """
     Find the most expensive ticket from a daily summary DataFrame.
 
     Returns:
         Tuple of (price, show_description)
     """
-    if len(df) > 0 and df["price"].max() > 0:
-        most_expensive_idx = df["price"].idxmax()
+    if len(df) > 0 and df[key].max() > 0:
+        most_expensive_idx = df[key].idxmax()
         most_expensive_row = df.loc[most_expensive_idx]
-        most_expensive = most_expensive_row["price"]
+        most_expensive = most_expensive_row[key]
         most_expensive_show = f"{most_expensive_row[QUALIFIED_NAME]}"
         return most_expensive, most_expensive_show
     else:
@@ -475,86 +482,36 @@ def collect_data_for_user_analysis(
     # Count total sets seen (total number of entries)
     sets_seen = len(df_indexed)
 
-    # Aggregate by batch_id: one row per concert/show
-    df_batch = (
-        df_reset.groupby("batch_id")
-        .agg(
-            {
-                # max bc some ppl only enter the price on one artist per night (the headline one)
-                PAID_PRICE: "max",
-                TYPE: lambda x: (x == festival_label).any(),
-                VENUE: "first",
-                ARTIST: "last" if running_order_headline_last else "first",
-                QUALIFIED_NAME: "first",
-                DATE: "first",  # Get the date for this batch
-            }
-        )
-        .reset_index()
-    )
-    df_batch.columns = ["batch_id", "price", "is_festival", VENUE, ARTIST, QUALIFIED_NAME, DATE]
-    df_batch = df_batch.sort_values(DATE)
+    df_pricing = df_indexed[df_indexed[INCLUDE_IN_PRICE] == True]
 
-    # Aggregate by date for day count metrics (days_with_show_wo_festival)
-    df_daily = (
-        df_reset.groupby(DATE)
-        .agg(
-            {
-                TYPE: lambda x: (x == festival_label).any(),
-            }
-        )
-        .reset_index()
-    )
-    df_daily.columns = [DATE, "is_festival"]
-    days_with_show_wo_festival = len(df_daily[~df_daily["is_festival"]])
-
-    # unique batches without festivals
-    unique_batches_wo_festival = len(df_batch[~df_batch["is_festival"]]["batch_id"].unique())
-
-    # Determine include_in_sum: False for consecutive festival days (same venue)
-    last_festival_date_by_venue = {}
-    df_batch["include_in_sum"] = True
-
-    for idx, row in df_batch.iterrows():
-        date = row[DATE]
-        qualified_name = row[QUALIFIED_NAME]
-        is_festival = row["is_festival"]
-
-        if is_festival and qualified_name in last_festival_date_by_venue:
-            last_festival_date = last_festival_date_by_venue[qualified_name]
-            if (date - last_festival_date).days >= 1:
-                df_batch.at[idx, "include_in_sum"] = False
-
-        if is_festival:
-            last_festival_date_by_venue[qualified_name] = date
-        elif qualified_name in last_festival_date_by_venue:
-            del last_festival_date_by_venue[qualified_name]
-
-    total_ticket_cost = df_batch[df_batch["include_in_sum"]]["price"].sum()
+    total_ticket_cost = df_pricing[PAID_PRICE].sum()
 
     # Calculate total ticket cost without festivals
-    df_no_festival = df_batch[~df_batch["is_festival"]]
-    total_ticket_cost_wo_festival = df_no_festival["price"].sum()
+    df_no_festival = df_pricing[~(df_pricing[TYPE] == festival_label)]
+    total_ticket_cost_wo_festival = df_no_festival[PAID_PRICE].sum()
 
     # Find most expensive ticket
-    most_expensive, most_expensive_show = find_most_expensive_ticket(df_batch)
+    most_expensive, most_expensive_show = find_most_expensive_ticket(df_pricing, PAID_PRICE)
 
     # Find most expensive ticket without festivals
-    most_expensive_wo_festival, most_expensive_show_wo_festival = find_most_expensive_ticket(df_no_festival)
+    most_expensive_wo_festival, most_expensive_show_wo_festival = find_most_expensive_ticket(df_no_festival, PAID_PRICE)
 
     # Calculate mean ticket costs (using batch_id aggregation)
-    mean_ticket_cost = round(df_batch[df_batch["include_in_sum"]]["price"].mean(), 2) if len(df_batch) > 0 else 0.0
-    mean_ticket_cost_wo_festival = round(df_no_festival["price"].mean(), 2) if len(df_no_festival) > 0 else 0.0
+    mean_ticket_cost = round(df_pricing[PAID_PRICE].mean(), 2) if len(df_indexed) > 0 else 0.0
+    mean_ticket_cost_wo_festival = round(df_no_festival[PAID_PRICE].mean(), 2) if len(df_no_festival) > 0 else 0.0
 
     # Calculate price per set
-    sets_wo_festival = len(df_reset[df_reset[TYPE] != festival_label])
+
+    df_all_sets_wo_festival = df_indexed.loc[df_indexed.index.isin(df_no_festival.index)]
+    sets_wo_festival_cnt = len(df_all_sets_wo_festival)
     price_per_set = round(total_ticket_cost / sets_seen, 2) if sets_seen > 0 else 0.0
     price_per_set_wo_festival = (
-        round(total_ticket_cost_wo_festival / sets_wo_festival, 2) if sets_wo_festival > 0 else 0.0
+        round(total_ticket_cost_wo_festival / sets_wo_festival_cnt, 2) if sets_wo_festival_cnt > 0 else 0.0
     )
 
     # Calculate total festival cost (festivals counted once for multi-day festivals)
-    df_festivals = df_batch[(df_batch["is_festival"]) & (df_batch["include_in_sum"])]
-    total_festival_cost = df_festivals["price"].sum()
+    df_festivals = df_pricing[get_festival_row_mask(df_pricing)]
+    total_festival_cost = df_festivals[PAID_PRICE].sum()
 
     # total countries
     total_countries = len(df_reset[COUNTRY].dropna().unique())
@@ -570,11 +527,11 @@ def collect_data_for_user_analysis(
 
     return UserAnalysis(
         unique_events=unique_concerts,
-        unique_events_wo_festival=unique_batches_wo_festival,
+        unique_events_wo_festival=len(df_no_festival),
         days_with_show=days_with_show,
-        days_with_show_wo_festival=days_with_show_wo_festival,
+        days_with_show_wo_festival=len(df_no_festival[DATE].unique()),
         sets_seen=sets_seen,
-        sets_seen_wo_festival=sets_wo_festival,
+        sets_seen_wo_festival=sets_wo_festival_cnt,
         total_ticket_cost=round(total_ticket_cost, 2),
         total_ticket_cost_wo_festival=round(total_ticket_cost_wo_festival, 2),
         most_expensive=round(most_expensive, 2),
@@ -590,6 +547,18 @@ def collect_data_for_user_analysis(
         total_cities=total_cities,
         total_venues=total_venues,
         total_artists=total_artists,
+    )
+
+
+def get_headline_rows_mask(df_indexed: DataFrame) -> DataFrame:
+    return (df_indexed[TYPE_CLASSIFICATION] == TopBandContext.TYPE_HEADLINE) | (
+        df_indexed[TYPE_CLASSIFICATION] == TopBandContext.TYPE_FESTIVAL_HEADLINE
+    )
+
+
+def get_festival_row_mask(df_indexed: DataFrame) -> DataFrame:
+    return (df_indexed[TYPE_CLASSIFICATION] == TopBandContext.TYPE_FESTIVAL) | (
+        df_indexed[TYPE_CLASSIFICATION] == TopBandContext.TYPE_FESTIVAL_HEADLINE
     )
 
 
@@ -904,25 +873,34 @@ def collect_data_for_artist(
 
 
 def query_for_label(group: DataFrame, label: str, target_col: str = TYPE) -> DataFrame:
+    # we use contains since Franka has multiple labels for headline slots in festivals (e.g. "Festival, Main Act")
     return group.loc[group[target_col].str.contains(label, na=False)]
 
 
 def determine_headliner_for_day(group: DataFrame, festival_label: str, headline_label: str, target_index: int) -> str:
 
+    headline_query = query_for_label(group, headline_label)
+
     # detect by running order
     if headline_label == "auto":
         return group.iloc[target_index][ARTIST]
 
-    # detect by festival label (choose venue as headliner, since we can't determine the headliner from the festival label alone)
-    # we use contains since Franka has multiple labels for headline slots in festivals (e.g. "Festival, Main Act")
-    elif len(query_for_label(group, festival_label)) > 0:
-        return group.iloc[target_index][ARTIST]
+    # let's see of we have a headliner
+    elif len(headline_query) == 1:
+        return headline_query.iloc[target_index][ARTIST]
 
-    # detect by headline label (choose the headliner from the headline label)
+    # detect by festival label (we dont have a headline tag)
+    # we will take the column with the highest amount, so we have the best chance to find the headline
+    # and not mess with our price calculations, which builds on headliner rows
+    elif len(query_for_label(group, festival_label)) > 0:
+        return group.iloc[group[PAID_PRICE].values.argmax()][ARTIST]
+
     else:
-        # We need those rows of 'TYPE' where 'headline_label' is in the type string
-        # reason for conatins at elif above
-        return query_for_label(group, headline_label)[ARTIST].iloc[0]
+        raise HTTPException(
+            400,
+            f"Did you set a headline label? "
+            f"Can't detect headliner for date {group.iloc[0][DATE]} - Artists: {group[ARTIST].values}.",
+        )
 
 
 context_collectors: dict[str, tuple[Callable, Callable]] = {
