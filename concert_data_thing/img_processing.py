@@ -475,11 +475,12 @@ class UserAnalysis(MarkerDrivenBaseModel):
     marker_mean_ticket_cost_wo_festival: ClassVar[str] = "Moc"
     mean_ticket_cost_wo_festival: float
 
-    marker_most_expensive: ClassVar[str] = "E"
-    most_expensive: float
-
-    marker_most_expensive_show: ClassVar[str] = "Eb"
-    most_expensive_show: str
+    # for reasoning see constructor call
+    # marker_most_expensive: ClassVar[str] = "E"
+    # most_expensive: float
+    #
+    # marker_most_expensive_show: ClassVar[str] = "Eb"
+    # most_expensive_show: str
 
     marker_most_expensive_wo_festival: ClassVar[str] = "Eo"
     most_expensive_wo_festival: float
