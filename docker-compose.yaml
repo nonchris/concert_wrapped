@@ -3,7 +3,7 @@ services:
     build: .
     container_name: concert_data_thing
     ports:
-      - "127.0.0.1:8005:8000"
+      - "127.0.0.1:8005:13675"
     volumes:
       - ./data/logs:/app/data/logs
       - ./data/artifacts:/app/data/artifacts
