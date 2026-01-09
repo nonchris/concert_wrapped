@@ -429,6 +429,20 @@ class MetaInfo(MarkerDrivenBaseModel):
     marker_year: ClassVar[str] = "YEAR"
     year: int
 
+    marker_start_date: ClassVar[str] = "Dts"
+    start_date_dt: dt.datetime
+
+    @property
+    def start_date(self):
+        return self.start_date_dt.strftime("%d.%m.%Y")
+
+    marker_end_date: ClassVar[str] = "Dte"
+    end_date_dt: dt.datetime
+
+    @property
+    def end_date(self):
+        return self.end_date_dt.strftime("%d.%m.%Y")
+
 
 class UserAnalysis(MarkerDrivenBaseModel):
     related_svg_solo_export: ClassVar[Path] = images_path / "user-high-level.svg"

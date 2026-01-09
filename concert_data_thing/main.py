@@ -1,3 +1,4 @@
+import datetime as dt
 import io
 import re
 import uuid
@@ -192,23 +193,32 @@ def count_column_occurrences(df: pd.DataFrame, column: str) -> pd.Series:
     return counts
 
 
-def select_rows_by_year(df: pd.DataFrame, year: int, date_column: str = DATE) -> pd.DataFrame:
+def select_rows_by_date_range(
+    df: pd.DataFrame,
+    start_date: dt.datetime,
+    end_date: dt.datetime,
+    date_column: str = DATE,
+) -> pd.DataFrame:
     """
-    Select only rows of the given year based on the date column.
+    Select only rows within the given date range based on the date column.
 
     Args:
         df: DataFrame with a date column.
-        year: The year to filter by (e.g., 2023).
+        start_date: The start date (inclusive).
+        end_date: The end date (inclusive).
         date_column: Name of the date column (default DATE).
 
     Returns:
-        DataFrame with only rows where the date_column is in the given year.
+        DataFrame with only rows where the date_column is between start_date and end_date (inclusive).
     """
     initial_count = len(df)
     date_series = pd.to_datetime(df[DATE], errors="coerce")
-    mask = date_series.dt.year == year
+    mask = (date_series >= start_date) & (date_series <= end_date)
     filtered_df = df[mask].reset_index(drop=True)
-    logger.info(f"Filtered by year {year}: {initial_count} rows -> {len(filtered_df)} rows")
+    logger.info(
+        f"Filtered by date range {start_date.date()} to {end_date.date()}: "
+        f"{initial_count} rows -> {len(filtered_df)} rows"
+    )
     return filtered_df
 
 
@@ -221,7 +231,8 @@ def analyze_concert_csv_file(csv_path: Path, *args, **kwargs):
 
 def analyze_concert_csv(
     csv_str: str,
-    filter_year: int,
+    start_date: dt.datetime,
+    end_date: dt.datetime,
     user_name: str,
     city: str,
     date: str = "Date",
@@ -248,7 +259,8 @@ def analyze_concert_csv(
 
     Args:
         csv_str (str): CSV content as a string.
-        filter_year (int): Year to filter by.
+        start_date (dt.datetime): Start date for filtering (inclusive).
+        end_date (dt.datetime): End date for filtering (inclusive).
         user_name (str): User name for the analysis.
         city (str): City name for the analysis.
         date (str): Column name for date (default: "Date").
@@ -273,7 +285,8 @@ def analyze_concert_csv(
     """
 
     logger.info(
-        f"Starting analysis for user={user_name}, year={filter_year}, city={city}, running_order_headline_last={running_order_headline_last}, request_id={request_id}"
+        f"Starting analysis for user={user_name}, date_range={start_date.date()} to {end_date.date()}, "
+        f"city={city}, running_order_headline_last={running_order_headline_last}, request_id={request_id}"
     )
     df = parse_concert_csv(
         csv_str,
@@ -333,7 +346,7 @@ def analyze_concert_csv(
         logger.debug(f"Found {event_name_count} rows with event names, using them for QUALIFIED_NAME")
     df.loc[event_name_mask, QUALIFIED_NAME] = df.loc[event_name_mask, EVENT_NAME]
 
-    df = select_rows_by_year(df, filter_year)
+    df = select_rows_by_date_range(df, start_date, end_date)
 
     # Create a MultiIndex DataFrame with batch_id as first index and a second index (0..N) per batch
     df_indexed = df.copy()
@@ -357,7 +370,17 @@ def analyze_concert_csv(
 
     logger.info(f"Classified {len(df_indexed)} rows with type_classification")
 
-    meta_info = MetaInfo(user_name=user_name, year=filter_year)
+    # Extract actual date range from filtered data
+    date_series = pd.to_datetime(df_indexed[DATE], errors="coerce")
+    # Extract year from the date range (use start_date year, or end_date year if they differ we could log a warning)
+    year = start_date.year
+
+    meta_info = MetaInfo(
+        user_name=user_name,
+        year=year,
+        start_date_dt=start_date,
+        end_date_dt=end_date,
+    )
 
     # TODO: later use coockies to store the request_id (basically reclide uuids)
     user_data_folder = Path(f"{ARTIFACTS_PATH}/user_data_{request_id}")
@@ -597,8 +620,8 @@ def high_level_user_analysis(
     dp.calendar(
         dates=entries_per_day.index.tolist(),
         values=entries_per_day.values.tolist(),
-        start_date=f"{meta_info.year}-01-01",
-        end_date=f"{meta_info.year}-12-31",
+        start_date=meta_info.start_date_dt.strftime("%Y-%m-%d"),
+        end_date=meta_info.end_date_dt.strftime("%Y-%m-%d"),
         ax=ax,
         color_for_none=moderate_color(color_scheme.gradient_low, saturation_factor=0.5, brightness_factor=0.5),
         cmap=LinearSegmentedColormap.from_list(
@@ -629,7 +652,7 @@ def high_level_user_analysis(
         lines = f.readlines()[4:]
         lines.insert(
             0,
-            '<svg xmlns:xlink="http://www.w3.org/1999/xlink" x="40" y="550" width="760pt" height="600pt" viewBox="0 0 1080 432" xmlns="http://www.w3.org/2000/svg" version="1.1">',
+            '<svg xmlns:xlink="http://www.w3.org/1999/xlink" x="40" y="830" width="760pt" height="600pt" viewBox="0 0 1080 432" xmlns="http://www.w3.org/2000/svg" version="1.1">',
         )
         map_svg_text = "\n".join(lines)
 

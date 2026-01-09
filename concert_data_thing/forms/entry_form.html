@@ -54,6 +54,7 @@
         }
         input[type="text"],
         input[type="number"],
+        input[type="date"],
         textarea {
             width: 100%;
             padding: 12px;
@@ -66,9 +67,34 @@
         }
         input[type="text"]:focus,
         input[type="number"]:focus,
+        input[type="date"]:focus,
         textarea:focus {
             outline: none;
             border-color: var(--color-primary);
+        }
+        input[type="color"] {
+            width: 100%;
+            height: 48px;
+            padding: 4px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            background-color: var(--color-bg-medium);
+            cursor: pointer;
+        }
+        input[type="color"]:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 4px;
+        }
+        input[type="color"]::-moz-color-swatch {
+            border: none;
+            border-radius: 4px;
         }
         textarea {
             min-height: 200px;
@@ -381,9 +407,17 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label for="filter_year">Filter Year <span class="required">*</span></label>
-                    <input type="number" id="filter_year" name="filter_year" required placeholder="2025" min="1900" max="2100">
-                    <div class="help-text">Year you want to generate stats for</div>
+                    <label>Date Range <span class="required">*</span></label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div style="flex: 1;">
+                            <input type="date" id="start_date" name="start_date" required placeholder="Start Date">
+                            <div class="help-text">Start date for analysis</div>
+                        </div>
+                        <div style="flex: 1;">
+                            <input type="date" id="end_date" name="end_date" required placeholder="End Date">
+                            <div class="help-text">End date for analysis</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="user_name">User Name <span class="required">*</span></label>
@@ -576,7 +610,8 @@
                 const formData = new FormData(e.target);
                 const data = {
                     csv_str: formData.get("csv_str"),
-                    filter_year: parseInt(formData.get("filter_year")),
+                    start_date: formData.get("start_date"),
+                    end_date: formData.get("end_date"),
                     user_name: formData.get("user_name") || "",
                     city: "[unset]",
                     date: formData.get("date") || "Date",

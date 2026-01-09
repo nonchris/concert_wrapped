@@ -1,5 +1,6 @@
 """FastAPI application entry point."""
 
+import datetime as dt
 import io
 import uuid
 import zipfile
@@ -96,7 +97,8 @@ class AnalyzeConcertRequest(BaseModel):
     """Request model for concert CSV analysis."""
 
     csv_str: str
-    filter_year: int
+    start_date: str
+    end_date: str
     user_name: str
     city: str
     date: str = "Date"
@@ -234,7 +236,28 @@ async def index(credentials: HTTPBasicCredentials = Depends(verify_credentials))
 async def favicon_ico() -> FileResponse:
     """Serve the favicon as ICO (browsers request this by default)."""
     favicon_path = static_folder / "favicon.png"
-    return FileResponse(favicon_path, media_type="image/png")
+    return FileResponse(
+        favicon_path,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "public, max-age=31536000, immutable",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
+
+
+@app.get("/favicon.png")
+async def favicon_png() -> FileResponse:
+    """Serve the favicon as PNG (alternative route)."""
+    favicon_path = static_folder / "favicon.png"
+    return FileResponse(
+        favicon_path,
+        media_type="image/png",
+        headers={
+            "Cache-Control": "public, max-age=31536000, immutable",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 @app.get("/health")
@@ -301,13 +324,30 @@ async def analyze_concert_route(
     Returns:
         JSON response with request_id and SVG paths.
     """
-    print(f"Received request: city={request.city}, user_name={request.user_name}, filter_year={request.filter_year}")
+    # Parse date strings to datetime objects
+    try:
+        start_date = dt.datetime.fromisoformat(request.start_date)
+        end_date = dt.datetime.fromisoformat(request.end_date)
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid date format. Expected ISO format (YYYY-MM-DD): {e}",
+        )
+
+    # Ensure end_date is at the end of the day (23:59:59)
+    end_date = end_date.replace(hour=23, minute=59, second=59)
+
+    print(
+        f"Received request: city={request.city}, user_name={request.user_name}, "
+        f"date_range={start_date.date()} to {end_date.date()}"
+    )
 
     request_id = uuid.uuid4()
 
     result = analyze_concert_csv(
         csv_str=request.csv_str,
-        filter_year=request.filter_year,
+        start_date=start_date,
+        end_date=end_date,
         user_name=request.user_name,
         city=request.city,
         date=request.date,
