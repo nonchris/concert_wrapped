@@ -239,7 +239,6 @@
         }
         .gallery-item .svg-container {
             width: 100%;
-            aspect-ratio: 1 / 1;
             background-color: var(--color-bg-dark);
             border: 1px solid var(--color-border);
             display: flex;
@@ -249,13 +248,12 @@
         }
         .gallery-item .svg-container svg {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
+            height: auto;
+            display: block;
         }
         .gallery-item img {
             width: 100%;
-            aspect-ratio: 1 / 1;
-            object-fit: contain;
+            height: auto;
             display: block;
             background-color: var(--color-bg-dark);
             border: 1px solid var(--color-border);
@@ -266,8 +264,8 @@
         .user-overview-img {
             width: 100%;
             max-width: 800px;
-            aspect-ratio: 1 / 1;
-            object-fit: contain;
+            height: auto;
+            display: block;
             border-radius: 6px;
             background-color: var(--color-bg-dark);
             border: 1px solid var(--color-border);
@@ -279,7 +277,6 @@
         }
         .user-overview-container {
             width: 100%;
-            aspect-ratio: 1 / 1;
             background-color: var(--color-bg-dark);
             border: 1px solid var(--color-border);
             border-radius: 6px;
@@ -290,11 +287,8 @@
         }
         .user-overview-container svg {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
-        .gallery-full-width .gallery-item .svg-container {
-            aspect-ratio: 1 / 1;
+            height: auto;
+            display: block;
         }
         .gallery-item-info {
             padding: 12px;
