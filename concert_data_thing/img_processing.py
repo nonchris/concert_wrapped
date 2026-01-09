@@ -69,19 +69,31 @@ class MarkerDrivenBaseModel(BaseModel):
         """Return marker string for batched items, or None if batching is not needed."""
         return None
 
+    MAGIC_NUMBER_LINEUP_ROWS: ClassVar[int] = 8
+    MAGIC_NUMBER_LINEUP_ROWS_LEN: ClassVar[int] = 50
+
     @staticmethod
-    def group_create_lineup_like(items: list[str], n_groups: int = 5, max_len: int = 50) -> list[str]:
+    def group_create_lineup_like(
+        items: list[str],
+        n_groups: int = MAGIC_NUMBER_LINEUP_ROWS,
+        max_len: int = MAGIC_NUMBER_LINEUP_ROWS_LEN,
+        place_entries_in_middle_of_list: bool = True,
+        do_one_per_line_if_possible: bool = True,
+    ) -> list[str]:
 
         groups = []
         current = items[0]
 
         last_appended = 0
         i = 0
+        one_by_line_possible = len(items) <= n_groups
+        do_join = not (one_by_line_possible and do_one_per_line_if_possible)
+
         for i, elm in enumerate(items[1:], start=0):
             potential_next = f"{current}, {elm}"
 
             # case that it fits just fine
-            if len(potential_next) < max_len:
+            if do_join and len(potential_next) < max_len:
                 current = potential_next
                 continue
 
@@ -102,8 +114,15 @@ class MarkerDrivenBaseModel(BaseModel):
         if last_appended < len(items) - 1 or last_appended == 0:
             groups.append(current)
 
+        last_down = False
         while len(groups) < n_groups:
-            groups.append("")
+            # if place_entries_in_middle_of_list is False we only append in the back (which is default)
+            if last_down and place_entries_in_middle_of_list:
+                groups.insert(0, "")
+            else:
+                groups.append("")
+
+            last_down = not last_down
 
         return groups
 
@@ -274,13 +293,13 @@ class TopBandContext(PriceAble):
         type_array = np.array(self.classified_sets)
         return price_array[type_array == _type].tolist()
 
-    def _get_headline_band_for_price_extreme(self, prices: list[float], use_max: bool) -> str:
+    def _get_value_for_price_extreme(self, prices: list[float], other: list, use_max: bool) -> str:
         """Get headline band name for the most/least expensive ticket."""
         if not prices:
             return "[unknown]"
         prices_np = np.array(prices)
         idx = np.argmax(prices_np) if use_max else np.argmin(prices_np)
-        headline_name = self.headline_per_night[idx]
+        headline_name = other[idx]
         # If the artist name matches the headline, return "headliner"
         if self.name == headline_name:
             return "Headliner"
@@ -290,13 +309,19 @@ class TopBandContext(PriceAble):
 
     @property
     def most_expensive_ticket_headline_band(self) -> str:
-        return self._get_headline_band_for_price_extreme(self.prices, use_max=True)
+        headliner = self._get_value_for_price_extreme(self.prices, self.headline_per_night, use_max=True)
+        venue = self._get_value_for_price_extreme(self.prices, self.venues, use_max=True)
+
+        # return f"{headliner}@{venue}"
+        return headliner
 
     marker_cheapest_ticket_headline_band: ClassVar[str] = "Cbx"
 
     @property
     def cheapest_ticket_headline_band(self) -> str:
-        return self._get_headline_band_for_price_extreme(self.prices, use_max=False)
+        headliner = self._get_value_for_price_extreme(self.prices, self.headline_per_night, use_max=False)
+        venue = self._get_value_for_price_extreme(self.prices, self.venues, use_max=True)
+        return headliner
 
 
 class VenueContext(PriceAble):
