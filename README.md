@@ -88,7 +88,7 @@ You can find the nix-deployment config in my [`nixos`](https://github.com/nonchr
 The docker image is built and started on the server manually.
 This nix config provides the password-secured public access.
 
-Thanks so much to @MayNiklas for contributing the docker and nix configs!
+Thanks so much to [@MayNiklas](https://github.com/MayNiklas) for contributing the docker and nix configs!
 
 ### Prerequisites
 
