@@ -25,14 +25,14 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:zoom="0.49845194"
-     inkscape:cx="551.70815"
-     inkscape:cy="725.24544"
+     inkscape:cx="552.71126"
+     inkscape:cy="725.24545"
      inkscape:window-width="1222"
      inkscape:window-height="1104"
      inkscape:window-x="1378"
      inkscape:window-y="658"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer3"
      showguides="true"
      showgrid="false">
     <sodipodi:guide
@@ -135,10 +135,6 @@
          style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.0561px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:#000000;fill-opacity:0.381625;stroke-width:1.29613"
          dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4686289">Wrapped tool created by cyber__chris</tspan></text>
   </g>
-  <g
-     id="layer1-3"
-     transform="translate(7.0313395e-7,65.675169)"
-     style="display:inline" />
   <g
      inkscape:label="HEADER"
      inkscape:groupmode="layer"
@@ -304,39 +300,6 @@
          y="1249.1373"
          style="font-size:37.3333px;fill:#00fe00"
          id="tspan21">&lt;Adg8&gt;</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:53.3333px;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ff00ff;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0"
-       x="540.03003"
-       y="895.56964"
-       id="text14-1"><tspan
-         sodipodi:role="line"
-         id="tspan14-7"
-         x="540.03003"
-         y="895.56964"
-         style="font-size:53.3333px;fill:#00fe00" /></text>
-    <text
-       xml:space="preserve"
-       style="font-size:53.3333px;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ff00ff;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0"
-       x="540.03003"
-       y="954.16479"
-       id="text14-5"><tspan
-         sodipodi:role="line"
-         id="tspan14-8"
-         x="540.03003"
-         y="954.16479"
-         style="font-size:53.3333px;fill:#00fe00" /></text>
-    <text
-       xml:space="preserve"
-       style="font-size:53.3333px;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ff00ff;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0"
-       x="540.03003"
-       y="1012.0033"
-       id="text14-3"><tspan
-         sodipodi:role="line"
-         id="tspan14-78"
-         x="540.03003"
-         y="1012.0033"
-         style="font-size:53.3333px;fill:#00fe00" /></text>
   </g>
   <rect
      style="display:inline;fill:none;stroke:#ff0808;stroke-width:2.2874;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
