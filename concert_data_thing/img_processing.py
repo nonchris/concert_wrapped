@@ -509,6 +509,9 @@ class UserAnalysis(MarkerDrivenBaseModel):
     marker_total_ticket_cost_wo_festival: ClassVar[str] = "Toc"
     total_ticket_cost_wo_festival: float
 
+    marker_total_festival_cost: ClassVar[str] = "Tfc"
+    total_festival_cost: float
+
     marker_mean_ticket_cost: ClassVar[str] = "Mc"
     mean_ticket_cost: float
 
@@ -533,9 +536,6 @@ class UserAnalysis(MarkerDrivenBaseModel):
 
     marker_price_per_set_wo_festival: ClassVar[str] = "Pso"
     price_per_set_wo_festival: float
-
-    marker_total_festival_cost: ClassVar[str] = "Tfc"
-    total_festival_cost: float
 
     marker_total_countries: ClassVar[str] = "Cn"
     total_countries: int
@@ -565,7 +565,6 @@ class UserAnalysis(MarkerDrivenBaseModel):
     marker_highest_discount_band: ClassVar[str] = "Tdb"
     highest_discount_band: str
 
-
     # DISCOUNT RELATED NON ZERO
     marker_highest_discount_non_zero: ClassVar[str] = "Tdz"
     highest_discount_non_zero: float
@@ -578,7 +577,15 @@ class UserAnalysis(MarkerDrivenBaseModel):
 
     # MOST EXPENSIVE MONTH
     marker_most_expensive_month: ClassVar[str] = "Mm"
-    most_expensive_month: str
+    most_expensive_month_: dt.datetime
+
+    @property
+    def most_expensive_month(self):
+        return self.most_expensive_month_.strftime("%B %Y")
+
+    marker_most_expensive_month_cost: ClassVar[str] = "Mmc"
+    most_expensive_month_cost: float
+
 
 if __name__ == "__main__":
     meta_data = MetaInfo(user_name="cyber_chris", year=2025)

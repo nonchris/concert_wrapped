@@ -534,7 +534,6 @@ def collect_data_for_user_analysis(
     highest_discount_band_non_zero = df_indexed.loc[idxmax_non_zero, QUALIFIED_NAME]
     highest_discount_original_price_non_zero = df_indexed.loc[idxmax_non_zero, ORIGINAL_PRICE]
 
-
     df_indexed["discounts_all"] = df_pricing[ORIGINAL_PRICE] - df_pricing[PAID_PRICE]
     idxmax_discount_all = df_indexed["discounts_all"].idxmax()
     highest_discount = df_indexed.loc[idxmax_discount_all, "discounts_all"]
@@ -542,14 +541,26 @@ def collect_data_for_user_analysis(
     highest_discount_original_price = df_indexed.loc[idxmax_discount_all, ORIGINAL_PRICE]
 
     # most expensive month by sum of PAID_PRICE (we want the month name)
-    most_expensive_month = df_indexed[PAID_PRICE].groupby(df_indexed[DATE].dt.month).sum().idxmax()
-    most_expensive_month_name = pd.to_datetime(most_expensive_month, unit="M").strftime("%B")
+    # Get max PAID_PRICE for each batch_id (first level index), then group by month and sum
+    max_price_per_batch = df_indexed.groupby(level=0).agg({PAID_PRICE: "max", DATE: "first"})
 
-    free_shows_cnt = df_indexed[PAID_PRICE].eq(0).sum()
+    # Keep the date column values; add a month column then group by month
+    max_price_per_batch["date_tmp"] = max_price_per_batch["date"].copy()
+    # Keep the earliest date for each month (for possible display) and sum the paid_price in that month
+    max_price_per_month = max_price_per_batch.groupby(max_price_per_batch["date_tmp"].dt.month).agg(
+        {"date": "first", "paid_price": "sum"}
+    )
 
+    most_expensive_entry = max_price_per_month.loc[max_price_per_month["paid_price"].idxmax()]
+    most_expensive_month = most_expensive_entry["date"]
+
+    # Construct the datetime that points to the month of the year
+    most_expensive_month_dt = pd.Timestamp(year=most_expensive_month.year, month=most_expensive_month.month, day=1)
+    most_expensive_month_cost = most_expensive_entry["paid_price"]
+
+    free_shows_cnt = len(df_indexed[df_indexed[PAID_PRICE] == 0].index.get_level_values(0).unique())
 
     # Calculate price per set
-
     # Select all rows where the first level index matches those in df_no_festival
     df_all_sets_wo_festival = df_indexed.loc[
         df_indexed.index.get_level_values(0).isin(df_no_festival.index.get_level_values(0))
@@ -600,19 +611,16 @@ def collect_data_for_user_analysis(
         total_cities=total_cities,
         total_venues=total_venues,
         total_artists=total_artists,
-
         total_ticket_value=round(total_ticket_value, 2),
-        most_expensive_month=most_expensive_month_name,
+        most_expensive_month_=most_expensive_month_dt,
+        most_expensive_month_cost=round(most_expensive_month_cost, 2),
         free_shows_cnt=free_shows_cnt,
-
         highest_discount=round(highest_discount, 2),
         highest_discount_band=highest_discount_band,
         highest_discount_original_price=round(highest_discount_original_price, 2),
-
         highest_discount_non_zero=round(highest_discount_non_zero, 2),
         highest_discount_non_zero_band=highest_discount_band_non_zero,
         highest_discount_non_zero_original_price=round(highest_discount_original_price_non_zero, 2),
-       
     )
 
 
@@ -655,33 +663,45 @@ def high_level_user_analysis(
     entries_per_day = df_reset_calendar.groupby(DATE)
     entries_per_day_count = np.log(entries_per_day.size())
 
-    user_svg_path_overview = make_user_overview_svg("high-level", df_indexed=df_indexed, svg_text=svg_text, user_analysis=user_analysis, meta_info=meta_info, color_scheme=color_scheme,
-                                           user_data_folder=user_data_folder, entries_per_day=entries_per_day_count)
+    user_svg_path_overview = make_user_overview_svg(
+        "high-level",
+        df_indexed=df_indexed,
+        svg_text=svg_text,
+        user_analysis=user_analysis,
+        meta_info=meta_info,
+        color_scheme=color_scheme,
+        user_data_folder=user_data_folder,
+        entries_per_day=entries_per_day_count,
+    )
 
     # USER COST
     svg_text = UserAnalysis.related_svg_cost_export.read_text()
-    entries_per_day_prices = np.log(
-        entries_per_day[PAID_PRICE].max().replace(0, np.nan).dropna()
+    entries_per_day_prices = np.log(entries_per_day[PAID_PRICE].max().replace(0, np.nan).dropna())
+    user_svg_path_costs = make_user_overview_svg(
+        "cost",
+        df_indexed=df_indexed,
+        svg_text=svg_text,
+        user_analysis=user_analysis,
+        meta_info=meta_info,
+        color_scheme=color_scheme,
+        user_data_folder=user_data_folder,
+        entries_per_day=entries_per_day_prices,
     )
-    user_svg_path_costs = make_user_overview_svg("cost", df_indexed=df_indexed, svg_text=svg_text, user_analysis=user_analysis, meta_info=meta_info, color_scheme=color_scheme,
-                                                    user_data_folder=user_data_folder, entries_per_day=entries_per_day_prices)
-
 
     return [user_svg_path_overview, user_svg_path_costs]
 
 
 def make_user_overview_svg(
-        svg_tag: str,
-        *,
-        df_indexed: DataFrame,
-        svg_text: str,
-        user_analysis: UserAnalysis,
-        meta_info: MetaInfo,
-        entries_per_day: pd.Series,
-        color_scheme: SVGStyleGuide,
-        user_data_folder: Path,
+    svg_tag: str,
+    *,
+    df_indexed: DataFrame,
+    svg_text: str,
+    user_analysis: UserAnalysis,
+    meta_info: MetaInfo,
+    entries_per_day: pd.Series,
+    color_scheme: SVGStyleGuide,
+    user_data_folder: Path,
 ) -> Path:
-
 
     logger.debug(f"Creating calendar visualization for {len(entries_per_day)} days")
     fig, ax = plt.subplots(figsize=(15, 6))
