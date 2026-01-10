@@ -29,6 +29,7 @@ from concert_data_thing.evnironment import BASIC_AUTH_USERNAME
 from concert_data_thing.garbage_collector import run_garbage_collector_loop
 from concert_data_thing.logger import LOGGING_PROVIDER
 from concert_data_thing.main import analyze_concert_csv
+from concert_data_thing.version import __version__
 
 logger = LOGGING_PROVIDER.new_logger("concert_data_thing.endpoints")
 
@@ -36,7 +37,7 @@ logger = LOGGING_PROVIDER.new_logger("concert_data_thing.endpoints")
 BASIC_AUTH_ENABLED = bool(BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD)
 
 static_folder = Path(__file__).resolve().parent / "forms"
-entry_point_form = (static_folder / "entry_form.html").read_text()
+entry_point_form = (static_folder / "entry_form.html").read_text().replace("{{VERSION}}", __version__)
 
 # FastAPI security scheme
 if BASIC_AUTH_ENABLED:
