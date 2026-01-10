@@ -34,15 +34,10 @@ This approach provides:
 | Variable              | Description                                                                   | Default              | Required |
 |-----------------------|-------------------------------------------------------------------------------|----------------------|----------|
 | `PORT`                | Port to listen on                                                             | 13675     | No |
-| `BASIC_AUTH_USERNAME` | Username for HTTP Basic Authentication                                        | `None` (disabled)    | No |
-| `BASIC_AUTH_PASSWORD` | Password for HTTP Basic Authentication                                        | `None` (disabled)    | No |
 | `ARTIFACTS_PATH`      | Directory path where generated SVG files are stored                           | `"out"`              | No |
 | `LOG_DIR`             | Directory path for log files                                                  | `None` (console only) | No |
 | `GC_MAX_AGE_HOURS`    | Maximum age in hours before artifact folders are deleted by garbage collector | `24`                 | No |
 | `GC_INTERVAL_MINUTES` | Interval in minutes between garbage collector cleanup runs                    | `10`                 | No |
-
-**Note**: If `BASIC_AUTH_USERNAME` and `BASIC_AUTH_PASSWORD` are both set, all endpoints (except `/health`) will require HTTP Basic Authentication.
-**If either is unset, authentication is disabled.**
 
 ## Running the thing
 

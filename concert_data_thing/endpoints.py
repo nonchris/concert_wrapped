@@ -9,23 +9,17 @@ from pathlib import Path
 from threading import Event
 from threading import Thread
 
-from fastapi import Depends
 from fastapi import FastAPI
 from fastapi import HTTPException
-from fastapi import status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.responses import HTMLResponse
 from fastapi.responses import Response
 from fastapi.responses import StreamingResponse
-from fastapi.security import HTTPBasic
-from fastapi.security import HTTPBasicCredentials
 from pydantic import BaseModel
 
 from concert_data_thing.data_models.settings import SVGStyleGuide
 from concert_data_thing.evnironment import API_PORT
-from concert_data_thing.evnironment import BASIC_AUTH_PASSWORD
-from concert_data_thing.evnironment import BASIC_AUTH_USERNAME
 from concert_data_thing.garbage_collector import run_garbage_collector_loop
 from concert_data_thing.logger import LOGGING_PROVIDER
 from concert_data_thing.main import analyze_concert_csv
@@ -33,48 +27,8 @@ from concert_data_thing.version import __version__
 
 logger = LOGGING_PROVIDER.new_logger("concert_data_thing.endpoints")
 
-# Basic Auth configuration from environment variables
-BASIC_AUTH_ENABLED = bool(BASIC_AUTH_USERNAME and BASIC_AUTH_PASSWORD)
-
 static_folder = Path(__file__).resolve().parent / "forms"
 entry_point_form = (static_folder / "entry_form.html").read_text().replace("{{VERSION}}", __version__)
-
-# FastAPI security scheme
-if BASIC_AUTH_ENABLED:
-    security = HTTPBasic()
-    logger.info(f"Basic auth is enabled, username: {BASIC_AUTH_USERNAME}, password: {'*' * len(BASIC_AUTH_PASSWORD)}")
-else:
-    security = lambda: True
-    logger.warning("!!! Basic auth is disabled !!!")
-
-
-def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)) -> HTTPBasicCredentials:
-    """
-    Verify basic auth credentials.
-
-    Args:
-        credentials: HTTP basic auth credentials from request.
-
-    Returns:
-        Credentials if valid.
-
-    Raises:
-        HTTPException: If authentication is enabled and credentials are invalid.
-    """
-    if not BASIC_AUTH_ENABLED:
-        return credentials
-
-    is_correct_username = credentials.username == BASIC_AUTH_USERNAME
-    is_correct_password = credentials.password == BASIC_AUTH_PASSWORD
-
-    if not (is_correct_username and is_correct_password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Basic"},
-        )
-
-    return credentials
 
 
 @asynccontextmanager
@@ -158,7 +112,7 @@ def get_svg_path(relative_path: str) -> Path:
 
 
 @app.get("/api/v1/svg/{file_path:path}")
-async def get_svg(file_path: str, credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> Response:
+async def get_svg(file_path: str) -> Response:
     """
     Serve an SVG file.
 
@@ -177,7 +131,7 @@ async def get_svg(file_path: str, credentials: HTTPBasicCredentials = Depends(ve
 
 
 @app.get("/api/v1/download/{file_path:path}")
-async def download_svg(file_path: str, credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> Response:
+async def download_svg(file_path: str) -> Response:
     """
     Download an SVG file.
 
@@ -196,9 +150,7 @@ async def download_svg(file_path: str, credentials: HTTPBasicCredentials = Depen
 
 
 @app.get("/api/v1/download-all/{request_id}")
-async def download_all_svgs(
-    request_id: str, credentials: HTTPBasicCredentials = Depends(verify_credentials)
-) -> StreamingResponse:
+async def download_all_svgs(request_id: str) -> StreamingResponse:
     """
     Download all SVGs for a request as a zip file.
 
@@ -228,7 +180,7 @@ async def download_all_svgs(
 
 
 @app.get("/", response_class=HTMLResponse)
-async def index(credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> HTMLResponse:
+async def index() -> HTMLResponse:
     """Serve the concert CSV analysis form."""
     return HTMLResponse(content=entry_point_form)
 
@@ -268,7 +220,7 @@ async def health() -> dict[str, str]:
 
 
 @app.get("/api/v1/example-chris")
-async def example_data(credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> Response:
+async def example_data() -> Response:
     """
     Serve the example CSV data.
 
@@ -280,7 +232,7 @@ async def example_data(credentials: HTTPBasicCredentials = Depends(verify_creden
 
 
 @app.get("/api/v1/example-franka")
-async def example_data(credentials: HTTPBasicCredentials = Depends(verify_credentials)) -> Response:
+async def example_data() -> Response:
     """
     Serve the example CSV data.
 
@@ -313,9 +265,7 @@ class AnalyzeConcertResponse(BaseModel):
 
 
 @app.post("/api/v1/analyze-concert")
-async def analyze_concert_route(
-    request: AnalyzeConcertRequest, credentials: HTTPBasicCredentials = Depends(verify_credentials)
-) -> AnalyzeConcertResponse:
+async def analyze_concert_route(request: AnalyzeConcertRequest) -> AnalyzeConcertResponse:
     """
     Analyze concert CSV data and return JSON with SVG paths.
 

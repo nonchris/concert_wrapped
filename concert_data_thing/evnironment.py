@@ -3,10 +3,6 @@ import os
 # API Configuration
 API_PORT = int(os.getenv("PORT", 13675))
 
-# Basic Auth Configuration
-BASIC_AUTH_USERNAME = os.getenv("BASIC_AUTH_USERNAME", None)
-BASIC_AUTH_PASSWORD = os.getenv("BASIC_AUTH_PASSWORD", None)
-
 # Path Configuration
 ARTIFACTS_PATH = os.getenv("ARTIFACTS_PATH", "out")
 LOG_DIR = os.getenv("LOG_DIR", None)
