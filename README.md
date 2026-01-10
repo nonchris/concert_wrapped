@@ -32,6 +32,9 @@ Here are some examples of the visualizations Concert Wrapped generates:
 </tr>
 </table>
 
+The red frames are placeholders, where you have to insert fitting pictures in post.
+I really didn't wanna do anything with image databases and stuff.
+
 ## More Detail
 
 The API accepts concert data in CSV format and generates comprehensive visualizations including:
