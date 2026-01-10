@@ -471,6 +471,7 @@ class MetaInfo(MarkerDrivenBaseModel):
 
 class UserAnalysis(MarkerDrivenBaseModel):
     related_svg_solo_export: ClassVar[Path] = images_path / "user-high-level.svg"
+    related_svg_pricing_export: ClassVar[Path] = images_path / "user-high-level.svg"
 
     marker_unique_events: ClassVar[str] = "Cs"
     unique_events: int
@@ -548,6 +549,36 @@ class UserAnalysis(MarkerDrivenBaseModel):
     marker_total_artists: ClassVar[str] = "Ar"
     total_artists: int
 
+    marker_total_ticket_value: ClassVar[str] = "Tv"
+    total_ticket_value: float
+
+    marker_free_shows_cnt: ClassVar[str] = "Fs"
+    free_shows_cnt: int
+
+    # DISCOUNT RELATED
+    marker_highest_discount: ClassVar[str] = "Td"
+    highest_discount: float
+
+    marker_highest_discount_original_price: ClassVar[str] = "Tdo"
+    highest_discount_original_price: float
+
+    marker_highest_discount_band: ClassVar[str] = "Tdb"
+    highest_discount_band: str
+
+
+    # DISCOUNT RELATED NON ZERO
+    marker_highest_discount_non_zero: ClassVar[str] = "Tdz"
+    highest_discount_non_zero: float
+
+    marker_highest_discount_non_zero_original_price: ClassVar[str] = "Tdoz"
+    highest_discount_non_zero_original_price: float
+
+    marker_highest_discount_non_zero_band: ClassVar[str] = "Tdbz"
+    highest_discount_non_zero_band: str
+
+    # MOST EXPENSIVE MONTH
+    marker_most_expensive_month: ClassVar[str] = "Mm"
+    most_expensive_month: str
 
 if __name__ == "__main__":
     meta_data = MetaInfo(user_name="cyber_chris", year=2025)

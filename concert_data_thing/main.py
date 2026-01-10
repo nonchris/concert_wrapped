@@ -508,6 +508,7 @@ def collect_data_for_user_analysis(
     df_pricing = df_indexed[df_indexed[INCLUDE_IN_PRICE] == True]
 
     total_ticket_cost = df_pricing[PAID_PRICE].sum()
+    total_ticket_value = df_pricing[ORIGINAL_PRICE].sum()
 
     # Calculate total ticket cost without festivals
     df_no_festival = df_pricing[~(get_festival_row_mask(df_indexed))]
@@ -522,6 +523,30 @@ def collect_data_for_user_analysis(
     # Calculate mean ticket costs (using batch_id aggregation)
     mean_ticket_cost = round(df_pricing[PAID_PRICE].mean(), 2) if len(df_indexed) > 0 else 0.0
     mean_ticket_cost_wo_festival = round(df_no_festival[PAID_PRICE].mean(), 2) if len(df_no_festival) > 0 else 0.0
+
+    # Only calculate discounts where the paid price is not zero
+    non_zero_paid = df_pricing[df_pricing[PAID_PRICE] != 0]
+    df_indexed["discounts_non_zero"] = non_zero_paid[ORIGINAL_PRICE] - non_zero_paid[PAID_PRICE]
+    # Find idxmax only once to avoid duplication
+    discounts_non_zero = df_indexed["discounts_non_zero"]
+    idxmax_non_zero = discounts_non_zero.idxmax()
+    highest_discount_non_zero = discounts_non_zero.max()
+    highest_discount_band_non_zero = df_indexed.loc[idxmax_non_zero, QUALIFIED_NAME]
+    highest_discount_original_price_non_zero = df_indexed.loc[idxmax_non_zero, ORIGINAL_PRICE]
+
+
+    df_indexed["discounts_all"] = df_pricing[ORIGINAL_PRICE] - df_pricing[PAID_PRICE]
+    idxmax_discount_all = df_indexed["discounts_all"].idxmax()
+    highest_discount = df_indexed.loc[idxmax_discount_all, "discounts_all"]
+    highest_discount_band = df_indexed.loc[idxmax_discount_all, QUALIFIED_NAME]
+    highest_discount_original_price = df_indexed.loc[idxmax_discount_all, ORIGINAL_PRICE]
+
+    # most expensive month by sum of PAID_PRICE (we want the month name)
+    most_expensive_month = df_indexed[PAID_PRICE].groupby(df_indexed[DATE].dt.month).sum().idxmax()
+    most_expensive_month_name = pd.to_datetime(most_expensive_month, unit="M").strftime("%B")
+
+    free_shows_cnt = df_indexed[PAID_PRICE].eq(0).sum()
+
 
     # Calculate price per set
 
@@ -575,6 +600,19 @@ def collect_data_for_user_analysis(
         total_cities=total_cities,
         total_venues=total_venues,
         total_artists=total_artists,
+
+        total_ticket_value=round(total_ticket_value, 2),
+        most_expensive_month=most_expensive_month_name,
+        free_shows_cnt=free_shows_cnt,
+
+        highest_discount=round(highest_discount, 2),
+        highest_discount_band=highest_discount_band,
+        highest_discount_original_price=round(highest_discount_original_price, 2),
+
+        highest_discount_non_zero=round(highest_discount_non_zero, 2),
+        highest_discount_non_zero_band=highest_discount_band_non_zero,
+        highest_discount_non_zero_original_price=round(highest_discount_original_price_non_zero, 2),
+       
     )
 
 
@@ -648,15 +686,7 @@ def high_level_user_analysis(
 
     svg_text = UserAnalysis.related_svg_solo_export.read_text()
 
-    with open(map_svg) as f:
-        lines = f.readlines()[4:]
-        lines.insert(
-            0,
-            '<svg xmlns:xlink="http://www.w3.org/1999/xlink" x="40" y="830" width="760pt" height="600pt" viewBox="0 0 1080 432" xmlns="http://www.w3.org/2000/svg" version="1.1">',
-        )
-        map_svg_text = "\n".join(lines)
-
-    svg_text = svg_text.replace("<!--MAP-->", map_svg_text)
+    svg_text = insert_sub_image_map(svg_text, map_svg)
 
     # Apply user analysis and meta info to SVG
     svg_text = user_analysis.apply_self_to_text(svg_text)
@@ -668,6 +698,19 @@ def high_level_user_analysis(
     logger.info(f"Saved high-level user analysis SVG to {user_svg_path}")
 
     return [user_svg_path]
+
+
+def insert_sub_image_map(svg_text: str, map_svg: Path) -> str:
+    with open(map_svg) as f:
+        lines = f.readlines()[4:]
+        lines.insert(
+            0,
+            '<svg xmlns:xlink="http://www.w3.org/1999/xlink" x="40" y="830" width="760pt" height="600pt" viewBox="0 0 1080 432" xmlns="http://www.w3.org/2000/svg" version="1.1">',
+        )
+        map_svg_text = "\n".join(lines)
+
+    svg_text = svg_text.replace("<!--MAP-->", map_svg_text)
+    return svg_text
 
 
 def create_svgs_for(
