@@ -46,6 +46,10 @@ All visualizations are generated as SVG files that can be viewed in browsers, do
 
 The SVG approach allows easy modifications to the images by the end user, since everything is editable.
 
+### Postprocessing
+The templates were all created in Inkscape.
+I recommend using it for the pos processing too.
+
 ### Please Note
 I built this because I wanted to have a tool I write [once](https://xkcd.com/1319/), instead of doing these statistics by hand every time in want some stats.
 I also hoped to I might create a tool that is useful (and usable) for my friends too.
