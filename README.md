@@ -55,6 +55,8 @@ Every past attempt I got lost in the 'feature-creep', trying to build the code a
 So this I tried to embrace some shortcuts and prefer outcome over perfect engineering.
 The code is probably okay to maintain, but there are some functions lacking doc strings or some inconsistent naming/ design in my dataclasses.
 
+This is also why the commit messages and the history itself is rather unstructured.
+
 ## SVG Template Approach
 
 The application uses a **placeholder-driven SVG template system** for generating visualizations.
@@ -79,6 +81,14 @@ This approach provides:
 | `GC_INTERVAL_MINUTES` | Interval in minutes between garbage collector cleanup runs                    | `10`                 | No |
 
 ## Running the thing
+
+Note.: It's probably no good idea to make this thing public facing w/o any password authentification.
+
+You can find the nix-deployment config in my [`nixos`](https://github.com/nonchris/nixos/blob/5f50a952da17a357ac1b1f482dd1d08d5e80a4dd/machines/mobi/configuration.nix#L63) repo.
+The docker image is built and started on the server manually.
+This nix config provides the password-secured public access.
+
+Thanks so much to @MayNiklas for contributing the docker and nix configs!
 
 ### Prerequisites
 
