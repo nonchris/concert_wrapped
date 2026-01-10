@@ -10,8 +10,6 @@ You can also run the analysis from the CLI, if you really want to.
 
 ## Examples
 
-Here are some examples of the visualizations Concert Wrapped generates:
-
 <table>
 <tr>
 <td>
@@ -139,3 +137,13 @@ This approach provides:
 
 The API will be available at `http://localhost:13675`.
 Generated SVG files will be stored in the `out/` directory (or the path specified by `ARTIFACTS_PATH`).
+
+#### AI Disclosure
+I used AI to accelerate parts of the development process.
+Everything in this Repo was audited by myself, I only accept (AI) changes manually.
+
+Most of the backend is written completely by hand.
+The frontend on the other hand has a rather large AI-ratio.
+The initial version of this readme was also done by AI.
+
+There is no usage of AI beside generating code, the designs of the SVGs are done by humans only.
