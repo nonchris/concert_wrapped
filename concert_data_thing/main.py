@@ -646,11 +646,42 @@ def high_level_user_analysis(
         df_indexed, running_order_headline_last, festival_label=festival_label
     )
 
+    # USER OVERVIEW
+    svg_text = UserAnalysis.related_svg_solo_export.read_text()
+
     # Count how many entries there are per day
     # Reset index to access DATE column, group by DATE to get entries per day
     df_reset_calendar = df_indexed.reset_index()
-    entries_per_day = df_reset_calendar.groupby(DATE).size()
-    entries_per_day = np.log(entries_per_day)
+    entries_per_day = df_reset_calendar.groupby(DATE)
+    entries_per_day_count = np.log(entries_per_day.size())
+
+    user_svg_path_overview = make_user_overview_svg("high-level", df_indexed=df_indexed, svg_text=svg_text, user_analysis=user_analysis, meta_info=meta_info, color_scheme=color_scheme,
+                                           user_data_folder=user_data_folder, entries_per_day=entries_per_day_count)
+
+    # USER COST
+    svg_text = UserAnalysis.related_svg_cost_export.read_text()
+    entries_per_day_prices = np.log(
+        entries_per_day[PAID_PRICE].max().replace(0, np.nan).dropna()
+    )
+    user_svg_path_costs = make_user_overview_svg("cost", df_indexed=df_indexed, svg_text=svg_text, user_analysis=user_analysis, meta_info=meta_info, color_scheme=color_scheme,
+                                                    user_data_folder=user_data_folder, entries_per_day=entries_per_day_prices)
+
+
+    return [user_svg_path_overview, user_svg_path_costs]
+
+
+def make_user_overview_svg(
+        svg_tag: str,
+        *,
+        df_indexed: DataFrame,
+        svg_text: str,
+        user_analysis: UserAnalysis,
+        meta_info: MetaInfo,
+        entries_per_day: pd.Series,
+        color_scheme: SVGStyleGuide,
+        user_data_folder: Path,
+) -> Path:
+
 
     logger.debug(f"Creating calendar visualization for {len(entries_per_day)} days")
     fig, ax = plt.subplots(figsize=(15, 6))
@@ -680,11 +711,9 @@ def high_level_user_analysis(
 
     fig.tight_layout()
 
-    map_svg = user_data_folder / "map.svg"
+    map_svg = user_data_folder / f"{svg_tag}-map.svg"
     plt.savefig(map_svg)
     logger.debug(f"Saved calendar map to {map_svg}")
-
-    svg_text = UserAnalysis.related_svg_solo_export.read_text()
 
     svg_text = insert_sub_image_map(svg_text, map_svg)
 
@@ -693,11 +722,10 @@ def high_level_user_analysis(
     svg_text = meta_info.apply_self_to_text(svg_text)
     svg_text = color_scheme.apply_self_to_text(svg_text)
 
-    user_svg_path = user_data_folder / "user-high-level.svg"
+    user_svg_path = user_data_folder / f"user-{svg_tag}.svg"
     user_svg_path.write_text(svg_text)
-    logger.info(f"Saved high-level user analysis SVG to {user_svg_path}")
-
-    return [user_svg_path]
+    logger.info(f"Saved {user_svg_path.name} user analysis SVG to {user_svg_path}")
+    return user_svg_path
 
 
 def insert_sub_image_map(svg_text: str, map_svg: Path) -> str:

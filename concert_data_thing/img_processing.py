@@ -471,7 +471,7 @@ class MetaInfo(MarkerDrivenBaseModel):
 
 class UserAnalysis(MarkerDrivenBaseModel):
     related_svg_solo_export: ClassVar[Path] = images_path / "user-high-level.svg"
-    related_svg_pricing_export: ClassVar[Path] = images_path / "user-high-level.svg"
+    related_svg_cost_export: ClassVar[Path] = images_path / "user-cost-analysis.svg"
 
     marker_unique_events: ClassVar[str] = "Cs"
     unique_events: int
