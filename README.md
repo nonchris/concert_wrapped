@@ -1,10 +1,38 @@
 # Concert Wrapped
 
-A FastAPI-based web service that analyzes concert attendance data from CSV files and generates SVG visualizations.
+Think of it as "Wrapped but for concerts" - providing statistics over your concert-going habits, favorite artists, venues, and cities.
+All you need is CSV with your data and Concert Wrapped will provide you with the stats as editable SVGs.
 
-Think of it as "Wrapped but for concerts" - providing insights into your concert-going habits, favorite artists, venues, and cities.
+Concert Wrapped is built as a FastAPI-based web service that analyzes concert attendance data from CSV files and generates SVG visualizations.
 
-## What It Does
+You can also run the analysis from the CLI, if you really want to.
+
+
+## Examples
+
+Here are some examples of the visualizations Concert Wrapped generates:
+
+<table>
+<tr>
+<td>
+<img src="examples/example_user-high-level.svg" alt="User High-Level Statistics">
+</td>
+<td>
+<img src="examples/example_user-cost.svg" alt="User Cost Analysis">
+</td>
+<td>
+<img src="examples/example_solo-artist-1-Silent Planet.svg" alt="Solo Artist Example - Silent Planet">
+</td>
+<td>
+<img src="examples/example_solo-city-1-Koln.svg" alt="Solo City Example - Köln">
+</td>
+<td>
+<img src="examples/example_solo-city-1-Koln.svg" alt="Solo City Example - Köln">
+</td>
+</tr>
+</table>
+
+## More Detail
 
 The API accepts concert data in CSV format and generates comprehensive visualizations including:
 
@@ -15,11 +43,21 @@ The API accepts concert data in CSV format and generates comprehensive visualiza
 
 All visualizations are generated as SVG files that can be viewed in browsers, downloaded individually, or exported as a ZIP archive.
 
-The SVG approach allows easy modifications to the images by the enduser, since everything is editable.
+The SVG approach allows easy modifications to the images by the end user, since everything is editable.
 
-## Technology: SVG Template Approach
+### Please Note
+I built this because I wanted to have a tool I write [once](https://xkcd.com/1319/), instead of doing these statistics by hand every time in want some stats.
+I also hoped to I might create a tool that is useful (and usable) for my friends too.
+It's actually the third time I attempted this. I think I succeeded this time.
 
-The application uses a **placeholder-driven SVG template system** for generating visualizations. Instead of programmatically drawing every element, the system, it uses pre-designed SVG templates with placeholder markers (e.g., `<Tcx>` for total cost)
+Every past attempt I got lost in the 'feature-creep', trying to build the code as clean and modular as possible.
+So this I tried to embrace some shortcuts and prefer outcome over perfect engineering.
+The code is probably okay to maintain, but there are some functions lacking doc strings or some inconsistent naming/ design in my dataclasses.
+
+## SVG Template Approach
+
+The application uses a **placeholder-driven SVG template system** for generating visualizations.
+Instead of programmatically drawing every element, the system, it uses pre-designed SVG templates with placeholder markers (e.g., `<Tcx>` for total cost).
 
 
 This approach provides:
@@ -27,7 +65,7 @@ This approach provides:
 - **Easy customization**: Modify SVG templates without changing Python code
 - **Scalable output**: SVG format is resolution-independent and web-friendly
 - **Fast generation**: Template replacement is more efficient than programmatic drawing
-- **Editable after genration**: Everything can be changed after the image is generated and downloaded.
+- **Editable after generation**: Everything can be changed after the image is generated and downloaded.
 
 ## Environment Variables
 
@@ -43,7 +81,7 @@ This approach provides:
 
 ### Prerequisites
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - pip
 
 ### Setup
@@ -87,13 +125,14 @@ This approach provides:
 
    Or using uvicorn directly:
    ```bash
-   uvicorn concert_data_thing.endpoints:app --host 0.0.0.0 --port 8000 --reload
+   uvicorn concert_data_thing.endpoints:app --host 0.0.0.0 --port 13675 --reload
    ```
 
 6. **Access the API**:
-   - Web interface: http://localhost:8000/
-   - API documentation: http://localhost:8000/docs
-   - Health check: http://localhost:8000/health
+   - Web interface: http://localhost:13675/
+   - API documentation: http://localhost:13675/docs
+   - Health check: http://localhost:13675/health
+   - Download sample data: http://localhost:13675/api/v1/example-chris
 
-The API will be available at `http://localhost:8000`.
+The API will be available at `http://localhost:13675`.
 Generated SVG files will be stored in the `out/` directory (or the path specified by `ARTIFACTS_PATH`).
