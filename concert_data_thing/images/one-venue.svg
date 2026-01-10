@@ -24,13 +24,13 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     inkscape:zoom="0.56846763"
-     inkscape:cx="533.89144"
-     inkscape:cy="553.24171"
-     inkscape:window-width="1382"
+     inkscape:zoom="0.40897209"
+     inkscape:cx="511.03732"
+     inkscape:cy="901.03949"
+     inkscape:window-width="1205"
      inkscape:window-height="1104"
-     inkscape:window-x="1377"
-     inkscape:window-y="658"
+     inkscape:window-x="1882"
+     inkscape:window-y="672"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer2"
      showguides="true"
@@ -90,7 +90,8 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="BACKGROUND"
-     style="display:inline">
+     style="display:inline"
+     sodipodi:insensitive="true">
     <rect
        style="fill:url(#linearGradient4);fill-opacity:1;stroke-width:1.11803"
        id="rect2"
@@ -98,18 +99,20 @@
        height="1350"
        x="0"
        y="0"
-       inkscape:label="BACKGROUND" />
+       inkscape:label="BACKGROUND"
+       sodipodi:insensitive="true" />
     <text
        xml:space="preserve"
        style="font-size:20.3891px;text-align:end;writing-mode:lr-tb;direction:ltr;text-anchor:end;display:inline;fill:#000000;fill-opacity:0.381625;stroke:#ff0808;stroke-width:1.31765;stroke-opacity:0"
-       x="1072.8276"
-       y="1338.8585"
+       x="1077.3523"
+       y="1338.9558"
        id="text17-0"
-       inkscape:label="CREDITS"><tspan
+       inkscape:label="CREDITS"
+       sodipodi:insensitive="true"><tspan
          sodipodi:role="line"
          id="tspan17-3"
-         x="0"
-         y="0"
+         x="1077.3523"
+         y="1338.9558"
          style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.3891px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:#000000;fill-opacity:0.381625;stroke-width:1.31765"
          dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4930121">Wrapped tool created by cyber__chris</tspan></text>
   </g>
