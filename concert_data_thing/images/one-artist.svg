@@ -24,15 +24,15 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     inkscape:zoom="0.88325333"
-     inkscape:cx="519.66971"
-     inkscape:cy="842.90653"
+     inkscape:zoom="1.201824"
+     inkscape:cx="381.91949"
+     inkscape:cy="372.3507"
      inkscape:window-width="1619"
      inkscape:window-height="1226"
      inkscape:window-x="1483"
      inkscape:window-y="659"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="layer2"
      showguides="true"
      showgrid="false">
     <sodipodi:guide
@@ -350,12 +350,12 @@
          y="1012.0033"
          style="font-size:53.3333px;fill:#00fe00" /></text>
     <rect
-       style="display:inline;fill:none;stroke:#ff0808;stroke-width:2.35288;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       style="display:inline;fill:none;stroke:#ff0808;stroke-width:2.2874;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
        id="rect1"
-       width="407.30472"
-       height="390.76358"
-       x="75.818588"
-       y="339.67041"
+       width="387.84589"
+       height="387.84637"
+       x="116.47308"
+       y="337.68097"
        inkscape:label="BAND-IMAGE-PLACEHOLDER" />
   </g>
 </svg>
