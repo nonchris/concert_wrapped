@@ -82,9 +82,9 @@ This approach provides:
 
 ## Running the thing
 
-Note.: It's probably no good idea to make this thing public facing w/o any password authentification.
+Note.: Don't leave it publicly exposed without additional protection/ auth in place.
 
-You can find the nix-deployment config in my [`nixos`](https://github.com/nonchris/nixos/blob/5f50a952da17a357ac1b1f482dd1d08d5e80a4dd/machines/mobi/configuration.nix#L63) repo.
+We deployed it via my [`nix-config`](https://github.com/nonchris/nixos/blob/5f50a952da17a357ac1b1f482dd1d08d5e80a4dd/machines/mobi/configuration.nix#L63) repo.
 The docker image is built and started on the server manually.
 This nix config provides the password-secured public access.
 
