@@ -479,6 +479,32 @@ def find_most_expensive_ticket(df: DataFrame, key: str) -> tuple[float, str]:
         return 0.0, "[unknown]"
 
 
+def calculate_highest_discount(
+    df_indexed: DataFrame, discounts: pd.Series, column_name: str
+) -> tuple[float, str, float]:
+    """
+    Calculate the highest discount from a series, handling negative discounts.
+
+    Negative discounts mean you got paid to attend. Returns the most extreme value
+    (highest positive discount or lowest negative discount).
+
+    Returns:
+        Tuple of (discount_value, band_name, original_price)
+    """
+    idx = discounts.idxmax()
+    highest_discount = discounts.max()
+
+    # you could get paid to attend, so we have to account for that xd
+    if (min_discount := discounts.min()) < 0:
+        highest_discount = min_discount
+        idx = discounts.idxmin()
+
+    band_name = df_indexed.loc[idx, QUALIFIED_NAME]
+    original_price = df_indexed.loc[idx, ORIGINAL_PRICE]
+
+    return highest_discount, band_name, original_price
+
+
 def collect_data_for_user_analysis(
     df_indexed: DataFrame, running_order_headline_last: bool, festival_label: str = "F"
 ) -> UserAnalysis:
@@ -527,18 +553,17 @@ def collect_data_for_user_analysis(
     # Only calculate discounts where the paid price is not zero
     non_zero_paid = df_pricing[df_pricing[PAID_PRICE] != 0]
     df_indexed["discounts_non_zero"] = non_zero_paid[ORIGINAL_PRICE] - non_zero_paid[PAID_PRICE]
-    # Find idxmax only once to avoid duplication
+
     discounts_non_zero = df_indexed["discounts_non_zero"]
-    idxmax_non_zero = discounts_non_zero.idxmax()
-    highest_discount_non_zero = discounts_non_zero.max()
-    highest_discount_band_non_zero = df_indexed.loc[idxmax_non_zero, QUALIFIED_NAME]
-    highest_discount_original_price_non_zero = df_indexed.loc[idxmax_non_zero, ORIGINAL_PRICE]
+    highest_discount_non_zero, highest_discount_band_non_zero, highest_discount_original_price_non_zero = (
+        calculate_highest_discount(df_indexed, discounts_non_zero, "discounts_non_zero")
+    )
 
     df_indexed["discounts_all"] = df_pricing[ORIGINAL_PRICE] - df_pricing[PAID_PRICE]
-    idxmax_discount_all = df_indexed["discounts_all"].idxmax()
-    highest_discount = df_indexed.loc[idxmax_discount_all, "discounts_all"]
-    highest_discount_band = df_indexed.loc[idxmax_discount_all, QUALIFIED_NAME]
-    highest_discount_original_price = df_indexed.loc[idxmax_discount_all, ORIGINAL_PRICE]
+    discounts_all = df_indexed["discounts_all"]
+    highest_discount, highest_discount_band, highest_discount_original_price = calculate_highest_discount(
+        df_indexed, discounts_all, "discounts_all"
+    )
 
     # most expensive month by sum of PAID_PRICE (we want the month name)
     # Get max PAID_PRICE for each batch_id (first level index), then group by month and sum
