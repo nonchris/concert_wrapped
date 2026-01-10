@@ -459,8 +459,17 @@
                     <input type="text" id="country" name="country" value="Country" placeholder="Country">
                 </div>
                 <div class="form-group">
-                    <label for="paid_price">Paid Price Column</label>
-                    <input type="text" id="paid_price" name="paid_price" value="Bezahlt Preis" placeholder="Bezahlt Preis">
+                    <label>Price Columns</label>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <div style="flex: 1;">
+                            <label for="original_price" style="font-size: 12px; color: var(--color-text-secondary);">Original Price Column</label>
+                            <input type="text" id="original_price" name="original_price" value="Preis" placeholder="Preis" style="margin-top: 4px;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="paid_price" style="font-size: 12px; color: var(--color-text-secondary);">Paid Price Column</label>
+                            <input type="text" id="paid_price" name="paid_price" value="Bezahlt Preis" placeholder="Bezahlt Preis" style="margin-top: 4px;">
+                        </div>
+                    </div>
                     <div class="help-text">
                         The max value per concert is extracted, empty fields are filled with zeros.<br>
                         So you can either enter the price in each row or in only one row per concert.<br>
@@ -508,13 +517,6 @@
                         You may wanna use it for festivals or if you want to give a tour a certain name.<br>
                         It may be partially empty, it's just important that all events that are labeled are labeld the same in all rows.
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="original_price">Original Price Column</label>
-                    <input type="text" id="original_price" name="original_price" value="Preis" placeholder="Preis">
-                    <div class="help-text">Currently unused, may be (partially) empty.
-                        Please select a column in your table that is either empty or contains only some numbers.<br>
-                        Do not use a column that you have already assigned to another field!</div>
                 </div>
                 <div class="form-group">
                     <label for="merch_cost">Merch Cost Column</label>
