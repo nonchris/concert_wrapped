@@ -24,9 +24,9 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     inkscape:zoom="1.1464479"
-     inkscape:cx="438.74649"
-     inkscape:cy="1104.7165"
+     inkscape:zoom="1.3874944"
+     inkscape:cx="252.25328"
+     inkscape:cy="903.4271"
      inkscape:window-width="1583"
      inkscape:window-height="838"
      inkscape:window-x="1345"
@@ -201,7 +201,7 @@
          x="540.03003"
          y="811.65082"
          id="tspan3"
-         style="font-size:37.3333px;fill:#00fe00">Sets seen: &lt;Sto&gt; + &lt;Sf&gt; (Festival Sets)</tspan><tspan
+         style="font-size:37.3333px;fill:#00fe00">Sets Seen: &lt;Sto&gt; + &lt;Sf&gt; (Festival Sets)</tspan><tspan
          sodipodi:role="line"
          x="540.03003"
          y="858.31744"
@@ -235,12 +235,12 @@
          style="font-size:37.3333px;fill:#00fe00"><tspan
            dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 2.041111"
            id="tspan12"
-           style="font-size:37.3333px;fill:#00fe00">Most expensive: &lt;Eo&gt;€ (&lt;Eob&gt;)</tspan></tspan><tspan
+           style="font-size:37.3333px;fill:#00fe00">Most Expensive: &lt;Eo&gt;€ (&lt;Eob&gt;)</tspan></tspan><tspan
          sodipodi:role="line"
          x="546.59253"
          y="1091.6506"
          style="font-size:37.3333px;fill:#00fe00"
-         id="tspan22">Price per set: &lt;Ps&gt;€ (incl. festivals: &lt;Pso&gt;€) </tspan></text><!--MAP--><text
+         id="tspan22">Price per Set: &lt;Ps&gt;€ (incl. festivals: &lt;Pso&gt;€) </tspan></text><!--MAP--><text
        xml:space="preserve"
        id="text2"
        style="font-size:37.3333px;text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect3);display:inline;fill:#00fe00;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0" /><text
@@ -269,7 +269,7 @@
          id="tspan17-5"
          x="540.03003"
          y="1308.1888"
-         style="font-size:13.3333px;fill:#00fe00">Sets per Day. Higher intensity means more Sets.</tspan></text></g><g
+         style="font-size:13.3333px;fill:#00fe00">Sets per day. Higher intensity means more sets.</tspan></text></g><g
      inkscape:groupmode="layer"
      id="layer4"
      inkscape:label="Credits"

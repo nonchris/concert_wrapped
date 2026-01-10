@@ -25,14 +25,14 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:zoom="1.0263352"
-     inkscape:cx="335.66032"
-     inkscape:cy="-42.383814"
+     inkscape:cx="520.78502"
+     inkscape:cy="542.22051"
      inkscape:window-width="1382"
      inkscape:window-height="1104"
      inkscape:window-x="1378"
      inkscape:window-y="658"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer3"
      showguides="true"
      showgrid="false">
     <sodipodi:guide
@@ -219,7 +219,7 @@
          x="571.91913"
          y="359.19226"
          id="tspan5"
-         style="font-size:29.3333px;stroke-width:0.737109">Concerts seen: &lt;Tv1&gt; </tspan><tspan
+         style="font-size:29.3333px;stroke-width:0.737109">Concerts Seen: &lt;Tv1&gt; </tspan><tspan
          sodipodi:role="line"
          x="571.91913"
          y="395.85889"
@@ -234,12 +234,12 @@
          x="571.91913"
          y="469.19214"
          style="font-size:29.3333px;stroke-width:0.737109"
-         id="tspan35">Total cost: &lt;Tc1&gt;€</tspan><tspan
+         id="tspan35">Total Cost: &lt;Tc1&gt;€</tspan><tspan
          sodipodi:role="line"
          x="571.91913"
          y="505.85876"
          style="font-size:29.3333px;stroke-width:0.737109"
-         id="tspan36">Mean cost: &lt;Mc1&gt;€</tspan><tspan
+         id="tspan36">Mean Cost: &lt;Mc1&gt;€</tspan><tspan
          sodipodi:role="line"
          x="571.91913"
          y="542.52539"
@@ -249,7 +249,7 @@
          x="571.91913"
          y="579.19202"
          style="font-size:29.3333px;stroke-width:0.737109"
-         id="tspan38">Most expensive:</tspan><tspan
+         id="tspan38">Most Expensive:</tspan><tspan
          sodipodi:role="line"
          x="571.91913"
          y="615.85864"
