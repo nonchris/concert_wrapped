@@ -25,14 +25,14 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:zoom="0.88325333"
-     inkscape:cx="530.4254"
-     inkscape:cy="-31.134895"
-     inkscape:window-width="1382"
-     inkscape:window-height="1104"
+     inkscape:cx="519.66971"
+     inkscape:cy="842.90653"
+     inkscape:window-width="1619"
+     inkscape:window-height="1226"
      inkscape:window-x="1483"
-     inkscape:window-y="687"
+     inkscape:window-y="659"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer3"
      showguides="true"
      showgrid="false">
     <sodipodi:guide
@@ -135,30 +135,15 @@
        width="1080"
        height="1350"
        x="0"
-       y="0" />
-    <g
-       id="layer1-3"
-       transform="translate(7.0313395e-7,65.675169)"
-       style="display:inline">
-      <text
-         xml:space="preserve"
-         style="font-size:40px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:#00fe00;stroke-width:0.327273"
-         x="540.03003"
-         y="186.37808"
-         id="text1-3"
-         inkscape:label="HEADER"><tspan
-           sodipodi:role="line"
-           id="tspan1-6"
-           x="540.03003"
-           y="186.37808"
-           style="font-size:40px;text-align:center;text-anchor:middle;fill:#00fe00;stroke-width:0.327273">&lt;Dts&gt; - &lt;Dte&gt;</tspan></text>
-    </g>
+       y="0"
+       inkscape:label="BACKGROUND" />
     <text
        xml:space="preserve"
        style="font-size:20.3891px;text-align:end;writing-mode:lr-tb;direction:ltr;text-anchor:end;display:inline;fill:#000000;fill-opacity:0.381625;stroke:#ff0808;stroke-width:1.31765;stroke-opacity:0"
        x="1072.8276"
        y="1340.6848"
-       id="text17-0"><tspan
+       id="text17-0"
+       inkscape:label="CREDITS"><tspan
          sodipodi:role="line"
          id="tspan17-3"
          x="0"
@@ -167,7 +152,7 @@
          dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4930121">Wrapped tool created by cyber__chris</tspan></text>
   </g>
   <g
-     inkscape:label="Layer 1"
+     inkscape:label="HEADER"
      inkscape:groupmode="layer"
      id="layer1"
      style="display:inline">
@@ -183,19 +168,24 @@
          x="540.03003"
          y="174.69186"
          style="font-size:58.6667px;text-align:center;text-anchor:middle;stroke-width:0.525518">&lt;B1&gt; seen &lt;S1&gt; times </tspan></text>
+    <text
+       xml:space="preserve"
+       style="display:inline;font-size:40px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#00fe00;stroke-width:0.327273"
+       x="540.03003"
+       y="186.37808"
+       id="text1-3"
+       inkscape:label="DATES"
+       transform="translate(7.0313395e-7,65.675169)"><tspan
+         sodipodi:role="line"
+         id="tspan1-6"
+         x="540.03003"
+         y="186.37808"
+         style="font-size:40px;text-align:center;text-anchor:middle;fill:#00fe00;stroke-width:0.327273">&lt;Dts&gt; - &lt;Dte&gt;</tspan></text>
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="BAND1">
-    <rect
-       style="display:inline;fill:none;stroke:#ff0808;stroke-width:2.35288;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
-       id="rect1"
-       width="407.30472"
-       height="390.76358"
-       x="75.818588"
-       y="339.67041"
-       inkscape:label="BAND1-IMG" />
     <text
        xml:space="preserve"
        style="font-size:45.8691px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:none;stroke:url(#pattern7);stroke-width:0.247024;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
@@ -284,7 +274,8 @@
        style="font-size:37.3333px;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ff00ff;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0"
        x="540.03003"
        y="922.47095"
-       id="text14"><tspan
+       id="text14"
+       inkscape:label="LINEUPS"><tspan
          sodipodi:role="line"
          id="tspan14"
          x="540.03003"
@@ -358,5 +349,13 @@
          x="540.03003"
          y="1012.0033"
          style="font-size:53.3333px;fill:#00fe00" /></text>
+    <rect
+       style="display:inline;fill:none;stroke:#ff0808;stroke-width:2.35288;stroke-linecap:butt;stroke-linejoin:miter;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1"
+       width="407.30472"
+       height="390.76358"
+       x="75.818588"
+       y="339.67041"
+       inkscape:label="BAND-IMAGE-PLACEHOLDER" />
   </g>
 </svg>
