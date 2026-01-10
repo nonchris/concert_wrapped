@@ -25,21 +25,16 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:zoom="0.49845194"
-     inkscape:cx="552.71126"
-     inkscape:cy="725.24545"
+     inkscape:cx="596.84791"
+     inkscape:cy="657.03426"
      inkscape:window-width="1222"
      inkscape:window-height="1104"
      inkscape:window-x="1378"
      inkscape:window-y="658"
      inkscape:window-maximized="0"
-     inkscape:current-layer="layer3"
+     inkscape:current-layer="svg1"
      showguides="true"
      showgrid="false">
-    <sodipodi:guide
-       position="40.777653,933.50623"
-       orientation="1,0"
-       id="guide4"
-       inkscape:locked="false" />
     <sodipodi:guide
        position="391.61994,1011.463"
        orientation="0,-1"
@@ -259,7 +254,8 @@
        style="font-size:37.3333px;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#ff00ff;stroke:#ff0808;stroke-width:1.034;stroke-opacity:0"
        x="540.03003"
        y="922.47095"
-       id="text14"><tspan
+       id="text14"
+       inkscape:label="LINEUPS"><tspan
          sodipodi:role="line"
          id="tspan14"
          x="540.03003"
@@ -308,5 +304,5 @@
      height="387.84561"
      x="116.47271"
      y="339.68069"
-     inkscape:label="BAND-_IMAGE_PLACEHOLDER" />
+     inkscape:label="BAND-IMAGE-PLACEHOLDER" />
 </svg>
