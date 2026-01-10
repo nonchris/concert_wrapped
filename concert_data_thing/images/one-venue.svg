@@ -32,7 +32,7 @@
      inkscape:window-x="1378"
      inkscape:window-y="658"
      inkscape:window-maximized="0"
-     inkscape:current-layer="svg1"
+     inkscape:current-layer="layer1"
      showguides="true"
      showgrid="false">
     <sodipodi:guide
@@ -138,6 +138,11 @@
   <g
      id="layer1-3"
      transform="translate(7.0313395e-7,65.675169)"
+     style="display:inline" />
+  <g
+     inkscape:label="HEADER"
+     inkscape:groupmode="layer"
+     id="layer1"
      style="display:inline">
     <text
        xml:space="preserve"
@@ -145,18 +150,13 @@
        x="540.03003"
        y="186.37808"
        id="text1-3"
-       inkscape:label="HEADER"><tspan
+       inkscape:label="DATE"
+       transform="translate(7.0313395e-7,65.675169)"><tspan
          sodipodi:role="line"
          id="tspan1-6"
          x="540.03003"
          y="186.37808"
          style="font-size:40px;text-align:center;text-anchor:middle;fill:#00fe00;stroke-width:0.327273">&lt;Dts&gt; - &lt;Dte&gt;</tspan></text>
-  </g>
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     style="display:inline">
     <text
        xml:space="preserve"
        style="font-size:58.6667px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;display:inline;fill:#00fe00;stroke-width:0.525518"
