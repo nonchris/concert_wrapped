@@ -686,7 +686,9 @@ def high_level_user_analysis(
     # Reset index to access DATE column, group by DATE to get entries per day
     df_reset_calendar = df_indexed.reset_index()
     entries_per_day = df_reset_calendar.groupby(DATE)
-    entries_per_day_count = np.log(entries_per_day.size())
+    # Guard against log(1) == 0 and log(0) == -inf; add 1 so values >=1 are not collapsed to 0
+    # it is for the calendar visualization, so a little offset doesnt hurt
+    entries_per_day_count = np.log(entries_per_day.size() + 1)
 
     user_svg_path_overview = make_user_overview_svg(
         "high-level",
@@ -701,6 +703,7 @@ def high_level_user_analysis(
 
     # USER COST
     svg_text = UserAnalysis.related_svg_cost_export.read_text()
+    # TODO: guard against values <= 1
     entries_per_day_prices = np.log(entries_per_day[PAID_PRICE].max().replace(0, np.nan).dropna())
     user_svg_path_costs = make_user_overview_svg(
         "cost",
