@@ -24,15 +24,15 @@
      inkscape:pagecheckerboard="1"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
-     inkscape:zoom="0.49845194"
-     inkscape:cx="596.84791"
-     inkscape:cy="657.03426"
+     inkscape:zoom="1.1448595"
+     inkscape:cx="653.79201"
+     inkscape:cy="521.02462"
      inkscape:window-width="1222"
      inkscape:window-height="1104"
      inkscape:window-x="1378"
      inkscape:window-y="658"
      inkscape:window-maximized="0"
-     inkscape:current-layer="svg1"
+     inkscape:current-layer="layer3"
      showguides="true"
      showgrid="false">
     <sodipodi:guide
@@ -203,12 +203,12 @@
          x="571.91913"
          y="469.19214"
          style="font-size:29.3333px;stroke-width:0.737109"
-         id="tspan35">Total Cost: &lt;Tc1&gt;€</tspan><tspan
+         id="tspan35">Total Spent: &lt;Tc1&gt;€</tspan><tspan
          sodipodi:role="line"
          x="571.91913"
          y="505.85876"
          style="font-size:29.3333px;stroke-width:0.737109"
-         id="tspan36">Mean Cost: &lt;Mc1&gt;€</tspan><tspan
+         id="tspan36">Mean Spent: &lt;Mc1&gt;€</tspan><tspan
          sodipodi:role="line"
          x="571.91913"
          y="542.52539"
