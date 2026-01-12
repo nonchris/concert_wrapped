@@ -431,10 +431,15 @@
             </div>
 
                 <div class="form-group">
-                    <label for="date">Date Column</label>
                     <div style="display: flex; gap: 10px;">
-                        <input type="text" id="date" name="date" value="Date" placeholder="Date" style="flex: 0.5;">
-                        <input type="text" id="date_format" name="date_format" value="%d.%m.%y" placeholder="%d.%m.%y" style="flex: 1;">
+                        <div style="flex: 0.5;">
+                            <label for="date">Date Column</label>
+                            <input type="text" id="date" name="date" value="Date" placeholder="Date">
+                        </div>
+                        <div style="flex: 1;">
+                            <label for="date_format">Date Interpretation Format</label>
+                            <input type="text" id="date_format" name="date_format" value="%d.%m.%y" placeholder="%d.%m.%y">
+                        </div>
                     </div>
                     <div class="help-text">
                         Date column name (left) and how to interpret date format (right).<br>
