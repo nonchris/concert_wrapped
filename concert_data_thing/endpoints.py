@@ -295,35 +295,42 @@ async def analyze_concert_route(request: AnalyzeConcertRequest) -> AnalyzeConcer
 
     request_id = uuid.uuid4()
 
-    result = analyze_concert_csv(
-        csv_str=request.csv_str,
-        start_date=start_date,
-        end_date=end_date,
-        user_name=request.user_name,
-        city=request.city,
-        date=request.date,
-        date_format=request.date_format,
-        sep=request.sep,
-        artist=request.artist,
-        venue=request.venue,
-        city_column=request.city_column,
-        country=request.country,
-        paid_price=request.paid_price,
-        original_price=request.original_price,
-        merch_cost=request.merch_cost,
-        type=request.type,
-        headline_label=request.headline_label,
-        support_label=request.support_label,
-        festival_label=request.festival_label,
-        event_name=request.event_name,
-        running_order_headline_last=request.running_order_headline_last,
-        color_scheme=SVGStyleGuide(
-            gradient_high=request.gradient_high.lower(),
-            gradient_low=request.gradient_low.lower(),
-            text_color=request.text_color.lower(),
-        ),
-        request_id=request_id,
-    )
+    try:
+        result = analyze_concert_csv(
+            csv_str=request.csv_str,
+            start_date=start_date,
+            end_date=end_date,
+            user_name=request.user_name,
+            city=request.city,
+            date=request.date,
+            date_format=request.date_format,
+            sep=request.sep,
+            artist=request.artist,
+            venue=request.venue,
+            city_column=request.city_column,
+            country=request.country,
+            paid_price=request.paid_price,
+            original_price=request.original_price,
+            merch_cost=request.merch_cost,
+            type=request.type,
+            headline_label=request.headline_label,
+            support_label=request.support_label,
+            festival_label=request.festival_label,
+            event_name=request.event_name,
+            running_order_headline_last=request.running_order_headline_last,
+            color_scheme=SVGStyleGuide(
+                gradient_high=request.gradient_high.lower(),
+                gradient_low=request.gradient_low.lower(),
+                text_color=request.text_color.lower(),
+            ),
+            request_id=request_id,
+        )
+    except Exception as e:
+        import logging
+
+        logger = logging.getLogger("concert_data_thing.endpoints")
+        logger.error(f"Error in analyze_concert_csv: {type(e).__name__}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {str(e)}") from e
 
     # Convert Path objects to strings relative to the request_id folder
     def path_to_api_path(path: Path) -> str:
