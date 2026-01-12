@@ -82,10 +82,24 @@ def parse_concert_csv(
     Returns:
         DataFrame with parsed dates and selected columns
     """
+    # i hate this but is is what it is
+    date = date.strip()
+    artist = artist.strip()
+    venue = venue.strip()
+    city = city.strip()
+    country = country.strip()
+    paid_price = paid_price.strip()
+    original_price = original_price.strip()
+    merch_cost = merch_cost.strip()
+    type = type.strip()
+    event_name = event_name.strip()
+
     logger.debug(
         f"Parsing CSV with column names: date={date}, date_format={date_format}, sep={sep}, artist={artist}, venue={venue}"
     )
     df = pd.read_csv(io.StringIO(csv_content), sep=sep)
+    # Strip whitespace from column names
+    df.columns = df.columns.str.strip()
 
     # Select only the columns we care about
     columns_to_select = [date, artist, venue, city, country, paid_price, original_price, merch_cost, type, event_name]
