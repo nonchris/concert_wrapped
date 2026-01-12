@@ -365,11 +365,11 @@ def analyze_concert_csv(
     target_index = -1 if running_order_headline_last else 0
     classify_shows(df_indexed, headline_label, festival_label, target_index)
 
-    # find headliners and attribute them
-    # TODO: this does not work when there is only a festival+headliner atm
-    #  in these cases we should go by the max of the batch id
+    #  select the row with the highest paid price for each batch
+    # this works when there is only one price entry per bacth and if the price is in every line
     df_indexed[INCLUDE_IN_PRICE] = False
-    df_indexed.loc[get_headline_rows_mask(df_indexed), INCLUDE_IN_PRICE] = True
+    idx_max = df_indexed[PAID_PRICE].groupby(level=0).idxmax()
+    df_indexed.loc[idx_max.values, INCLUDE_IN_PRICE] = True
 
     logger.info(f"Classified {len(df_indexed)} rows with type_classification")
 
