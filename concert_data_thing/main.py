@@ -292,6 +292,19 @@ def analyze_concert_csv(
         f"Starting analysis for user={user_name}, date_range={start_date.date()} to {end_date.date()}, "
         f"city={city}, running_order_headline_last={running_order_headline_last}, request_id={request_id}"
     )
+
+    keys_list = [date, artist, venue, city, country, paid_price, original_price, merch_cost, type, event_name]
+
+    if len(set(keys_list)) != len(keys_list):
+        duplicates = [k for k, v in Counter(keys_list).items() if v > 1]
+
+        raise HTTPException(
+            400,
+            f"Each column may only used for one purpose. You used '{', '.join(duplicates)}' multiple times. "
+            "If you want to reuse a column, copy it in you data and rename it. "
+            "You can also provide empty columns for numeric values. Some of the analysis might not make sense, but the system will still work.",
+        )
+
     df = parse_concert_csv(
         csv_str,
         date=date,
@@ -307,18 +320,6 @@ def analyze_concert_csv(
         type=type,
         event_name=event_name,
     )
-
-    keys_list = [date, artist, venue, city, country, paid_price, original_price, merch_cost, type, event_name]
-
-    if len(set(keys_list)) != len(keys_list):
-        duplicates = [k for k, v in Counter(keys_list).items() if v > 1]
-
-        raise HTTPException(
-            400,
-            f"Each column may only used for one purpose. You used '{', '.join(duplicates)}' multiple times. "
-            "If you want to reuse a column, copy it in you data and rename it. "
-            "You can also provide empty columns for numeric values. Some of the analysis might not make sense, but the system will still work.",
-        )
 
     # Add QUALIFIED_NAME: EVENT_NAME if present (takes priority), otherwise headliner artist (fallback)
     # First, determine headliner for each batch and initialize QUALIFIED_NAME with headliner
