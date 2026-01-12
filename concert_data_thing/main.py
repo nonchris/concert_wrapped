@@ -495,6 +495,9 @@ def calculate_highest_discount(
         Tuple of (discount_value, band_name, original_price)
     """
     idx = discounts.idxmax()
+    if pd.isna(idx):
+        return 0.0, "[unknown]", 0.0
+
     highest_discount = discounts.max()
 
     # you could get paid to attend, so we have to account for that xd
