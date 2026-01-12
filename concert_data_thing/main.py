@@ -89,6 +89,17 @@ def parse_concert_csv(
 
     # Select only the columns we care about
     columns_to_select = [date, artist, venue, city, country, paid_price, original_price, merch_cost, type, event_name]
+
+    if len(set(columns_to_select)) != len(columns_to_select):
+        duplicates = [k for k, v in Counter(columns_to_select).items() if v > 1]
+
+        raise HTTPException(
+            400,
+            f"Each column may only used for one purpose. You used '{', '.join(duplicates)}' multiple times. "
+            "If you want to reuse a column, copy it in you data and rename it. "
+            "You can also provide empty columns for numeric values. Some of the analysis might not make sense, but the system will still work.",
+        )
+
     try:
         df = df[columns_to_select].copy()
     except KeyError as e:
@@ -292,18 +303,6 @@ def analyze_concert_csv(
         f"Starting analysis for user={user_name}, date_range={start_date.date()} to {end_date.date()}, "
         f"city={city}, running_order_headline_last={running_order_headline_last}, request_id={request_id}"
     )
-
-    keys_list = [date, artist, venue, city, country, paid_price, original_price, merch_cost, type, event_name]
-
-    if len(set(keys_list)) != len(keys_list):
-        duplicates = [k for k, v in Counter(keys_list).items() if v > 1]
-
-        raise HTTPException(
-            400,
-            f"Each column may only used for one purpose. You used '{', '.join(duplicates)}' multiple times. "
-            "If you want to reuse a column, copy it in you data and rename it. "
-            "You can also provide empty columns for numeric values. Some of the analysis might not make sense, but the system will still work.",
-        )
 
     df = parse_concert_csv(
         csv_str,
