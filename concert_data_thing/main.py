@@ -104,9 +104,12 @@ def parse_concert_csv(
         logger.warning(f"Found {invalid_dates} rows with invalid or unparseable dates")
 
     # Convert numeric columns to float (handles empty strings as NaN)
-    df[paid_price] = pd.to_numeric(df[paid_price], errors="coerce").fillna(0.0)
-    df[original_price] = pd.to_numeric(df[original_price], errors="coerce").fillna(0.0)
-    df[merch_cost] = pd.to_numeric(df[merch_cost], errors="coerce").fillna(0.0)
+    # Parse numbers with German "," as decimal separator; then fallback to standard float
+    for col in [paid_price, original_price, merch_cost]:
+        # TODO: this fails on prices larger 1000 e.g. 1.234,56
+        df[col] = pd.to_numeric(df[col].astype(str).str.replace(",", ".").str.replace("€", ""), errors="coerce").fillna(
+            0
+        )
 
     # Rename columns to internal names for consistency
     df = df.rename(
