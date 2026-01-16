@@ -155,6 +155,13 @@ def parse_concert_csv(
 
 
 def parse_dates(df: DataFrame, date_col_name_user: str, date_format: str) -> tuple[DataFrame, int]:
+    """
+    attempts to parse the date column, it is robust against %y and %Y to be more user-friendly (wuhu)
+    Returns:
+        Dataframe: The passed dataframe with the (better) parsed date column inserted
+        Na Count: How many entries are NA with the usage of the better year format
+    """
+
     # Convert date column to datetime with specified format
     def _parse_dates(_date_format):
         new_col = pd.to_datetime(df[date_col_name_user], format=_date_format, errors="coerce")
