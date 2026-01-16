@@ -123,11 +123,8 @@ def parse_concert_csv(
         )
     logger.debug(f"Selected {len(columns_to_select)} columns, initial row count: {len(df)}")
 
-    # Convert date column to datetime with specified format
-    df[date] = pd.to_datetime(df[date], format=date_format, errors="coerce")
-    invalid_dates = df[date].isna().sum()
-    if invalid_dates > 0:
-        logger.warning(f"Found {invalid_dates} rows with invalid or unparseable dates")
+    df, na_count = parse_dates(df, date, date_format)
+    # TODO if na_count is != 0 show some kind of warning on the frontend
 
     # Convert numeric columns to float (handles empty strings as NaN)
     # Parse numbers with German "," as decimal separator; then fallback to standard float
@@ -155,6 +152,55 @@ def parse_concert_csv(
 
     logger.info(f"Successfully parsed CSV: {len(df)} rows, date range: {df[DATE].min()} to {df[DATE].max()}")
     return df
+
+
+def parse_dates(df: DataFrame, date_col_name_user: str, date_format: str) -> tuple[DataFrame, int]:
+    # Convert date column to datetime with specified format
+    def _parse_dates(_date_format):
+        new_col = pd.to_datetime(df[date_col_name_user], format=_date_format, errors="coerce")
+        return new_col, new_col.isna().sum()
+
+    # let's see if the provided date is right
+    potential_dates_orig_format, na_count_orig = _parse_dates(date_format)
+    if na_count_orig == 0:
+        df[date_col_name_user] = potential_dates_orig_format
+        return df, na_count_orig
+
+    logger.warning(f"Found {na_count_orig} rows with invalid or unparseable dates with ORIGINAL format: {date_format}")
+
+    # swappy swapswap the Y
+    if "y" in date_format:
+        new_date_format = date_format.replace("y", "Y")
+    elif "Y" in date_format:
+        new_date_format = date_format.replace("Y", "y")
+    else:
+        raise HTTPException(
+            400,
+            f"It seems like you didn't provide a year indicator. Please add `%y` to your format. "
+            f"If your data doesn't include the year in the date column, please add it. "
+            f"Your provided format: '{date_format}'",
+        )
+
+    # test new date format
+    potential_dates_new_format, na_count_new = _parse_dates(new_date_format)
+
+    logger.warning(f"Found {na_count_new} rows with invalid or unparseable dates with NEW format: {new_date_format}")
+
+    # let's see of this is perfect
+    if na_count_new == 0:
+        df[date_col_name_user] = potential_dates_new_format
+        return df, na_count_new
+
+    # both are faulty
+    # let's take at least the better one
+    if na_count_orig <= na_count_new:
+        df[date_col_name_user] = potential_dates_orig_format
+        return df, na_count_orig
+
+    df[date_col_name_user] = potential_dates_new_format
+    return df, na_count_new
+
+    # df[date_col_name_user]
 
 
 def group_by_day(

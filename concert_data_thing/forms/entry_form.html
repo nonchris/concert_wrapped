@@ -439,16 +439,17 @@
                         <div style="flex: 1;">
                             <label for="date_format">Date Interpretation Format</label>
                             <input type="text" id="date_format" name="date_format" value="%d.%m.%y" placeholder="%d.%m.%y">
+                            <div class="help-text">
+                                How to interpret your general date format.<br>
+                                Examples: <code>%d.%m.%y</code> (for dates like: 21.07.25),
+                                <code>%y-%m-%d</code> (e.g: 2025-07-21).<br>
+                                Refer to Python's strftime/strptime format codes for more options:
+                                <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes" target="_blank" rel="noopener">reference</a>.
+                                <br><br>
+                        </div>
                         </div>
                     </div>
-                    <div class="help-text">
-                        Date column name (left) and how to interpret date format (right).<br>
-                        Examples: <code>%d.%m.%y</code> (e.g. 21.07.25),
-                        <code>%Y-%m-%d</code> (e.g. 2025-07-21).<br>
-                        Most important: "Y" = 2025, "y" = 25. Refer to Python's strftime/strptime format codes for more options:
-                        <a href="https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes" target="_blank" rel="noopener">reference</a>.
-                        <br><br>
-                </div>
+
                 <div class="form-group">
                     <label for="artist">Artist Column</label>
                     <input type="text" id="artist" name="artist" value="Artist" placeholder="Artist">
