@@ -692,6 +692,9 @@ def collect_data_for_user_analysis(
     total_venues = len(df_reset[VENUE].dropna().unique())
     total_artists = len(df_reset[ARTIST].dropna().unique())
 
+    total_merch_cost = df_indexed[MERCH_COST].sum()
+    mean_merch_cost = round(total_merch_cost / days_with_show, 2) if days_with_show > 0 else 0.0
+
     logger.info(
         f"User analysis summary: {days_with_show} days, {unique_concerts} concerts, {sets_seen} sets, "
         f"€{total_ticket_cost:.2f} total cost, {total_artists} artists, {total_venues} venues, "
@@ -732,6 +735,8 @@ def collect_data_for_user_analysis(
         highest_discount_non_zero=round(highest_discount_non_zero, 2),
         highest_discount_non_zero_band=highest_discount_band_non_zero,
         highest_discount_non_zero_original_price=round(highest_discount_original_price_non_zero, 2),
+        total_merch_cost=round(total_merch_cost, 2),
+        mean_merch_cost=round(mean_merch_cost, 2),
     )
 
 
@@ -867,7 +872,7 @@ def insert_sub_image_map(svg_text: str, map_svg: Path) -> str:
         lines = f.readlines()[4:]
         lines.insert(
             0,
-            '<svg xmlns:xlink="http://www.w3.org/1999/xlink" x="40" y="830" width="760pt" height="600pt" viewBox="0 0 1080 432" xmlns="http://www.w3.org/2000/svg" version="1.1">',
+            '<svg xmlns:xlink="http://www.w3.org/1999/xlink" x="40" y="830" width="760pt" height="760pt" viewBox="0 0 1080 432" xmlns="http://www.w3.org/2000/svg" version="1.1">',
         )
         map_svg_text = "\n".join(lines)
 

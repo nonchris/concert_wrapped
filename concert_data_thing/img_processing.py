@@ -537,6 +537,12 @@ class UserAnalysis(MarkerDrivenBaseModel):
     marker_price_per_set_wo_festival: ClassVar[str] = "Pso"
     price_per_set_wo_festival: float
 
+    marker_total_merch_cost: ClassVar[str] = "Tmc"
+    total_merch_cost: float
+
+    marker_mean_merch_cost: ClassVar[str] = "Mmc"
+    mean_merch_cost: float
+
     marker_total_countries: ClassVar[str] = "Cn"
     total_countries: int
 
