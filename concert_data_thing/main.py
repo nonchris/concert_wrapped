@@ -822,8 +822,29 @@ def make_user_overview_svg(
     user_data_folder: Path,
 ) -> Path:
 
+    def estimate_day_x_margin(x: int, intercept_for_days_lower_than: int = 125) -> float:
+        """
+        When the number of days gets too low the placement of the day labels gets smh wonky and overlaps the first row
+
+        This function intercepts this phenomenon uses some trial and error values that ensure that the label spacing
+        is somewhat consistent
+
+        Returns the default for larger values
+        """
+
+        start_date = meta_info.start_date_dt
+        end_date = meta_info.end_date_dt
+        days_diff = (end_date - start_date).days
+        if days_diff > intercept_for_days_lower_than:
+            return 0.02
+
+        m = (0.02 - 0.3) / (365 - 30)  # slope
+        b = 0.15 - m * 30
+        res = m * x + b
+        return max(res, 0.02)  # in case we'll get ever negative smh intercept with default value
+
     logger.debug(f"Creating calendar visualization for {len(entries_per_day)} days")
-    fig, ax = plt.subplots(figsize=(15, 6))
+    fig, ax = plt.subplots(figsize=(15, 2.5))
 
     dp.calendar(
         dates=entries_per_day.index.tolist(),
@@ -842,13 +863,14 @@ def make_user_overview_svg(
         day_kws={"color": color_scheme.text_color},
         month_kws={"color": color_scheme.text_color},
         week_starts_on="Monday",
+        day_x_margin=estimate_day_x_margin((meta_info.end_date_dt - meta_info.start_date_dt).days),
     )
 
     # Set calendar background to transparent
     fig.patch.set_alpha(0.0)
     ax.set_facecolor("none")
 
-    fig.tight_layout()
+    plt.tight_layout()
 
     map_svg = user_data_folder / f"{svg_tag}-map.svg"
     plt.savefig(map_svg)
