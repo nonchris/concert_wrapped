@@ -503,6 +503,24 @@ class UserAnalysis(MarkerDrivenBaseModel):
     def sets_seen_festival(self):
         return self.sets_seen - self.sets_seen_wo_festival
 
+    marker_new_artists: ClassVar[str] = "Na"
+    new_artists: int
+
+    marker_seen_before_artists: ClassVar[str] = "Oa"
+    seen_before_artists: int
+
+    marker_new_venues: ClassVar[str] = "Nv"
+    new_venues: int
+
+    marker_visited_before_venues: ClassVar[str] = "Ov"
+    visited_before_venues: int
+
+    marker_new_cities: ClassVar[str] = "Nc"
+    new_cities: int
+
+    marker_visited_before_cities: ClassVar[str] = "Oc"
+    visited_before_cities: int
+
     marker_total_ticket_cost: ClassVar[str] = "Tc"
     total_ticket_cost: float
 

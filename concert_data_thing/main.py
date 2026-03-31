@@ -429,6 +429,9 @@ def analyze_concert_csv(
         logger.debug(f"Found {event_name_count} rows with event names, using them for QUALIFIED_NAME")
     df.loc[event_name_mask, QUALIFIED_NAME] = df.loc[event_name_mask, EVENT_NAME]
 
+    before_date_df = select_rows_by_date_range(
+        df.copy(), dt.datetime(1970, 1, 1, 1), end_date=start_date - dt.timedelta(days=1)
+    )
     df = select_rows_by_date_range(df, start_date, end_date)
 
     # Create a MultiIndex DataFrame with batch_id as first index and a second index (0..N) per batch
@@ -498,6 +501,7 @@ def analyze_concert_csv(
     logger.info("Performing high-level user analysis")
     user_svg_paths = high_level_user_analysis(
         df_indexed,
+        before_date_df,
         meta_info,
         running_order_headline_last,
         user_data_folder,
@@ -623,7 +627,7 @@ def split_entres_into_commonand_and_unique(
 
 
 def collect_data_for_user_analysis(
-    df_indexed: DataFrame, running_order_headline_last: bool, festival_label: str = "F"
+    df_indexed: DataFrame, before_date_df: DataFrame, running_order_headline_last: bool, festival_label: str = "F"
 ) -> UserAnalysis:
     """
     Collect user-level analysis data from the DataFrame.
@@ -633,6 +637,15 @@ def collect_data_for_user_analysis(
     Handles multi-day festivals by only counting ticket cost once for sequential
     days where TYPE equals festival_label and VENUE is the same.
     """
+
+    seen_before, seen_first_time = split_entres_into_commonand_and_unique(df_indexed, before_date_df)
+    venues_visited_before, venues_visited_first_time = split_entres_into_commonand_and_unique(
+        df_indexed, before_date_df, column=VENUE
+    )
+    cities_visited_before, cities_visited_first_time = split_entres_into_commonand_and_unique(
+        df_indexed, before_date_df, CITY
+    )
+
     logger.debug(f"Collecting user-level analysis data with festival_label={festival_label}")
     # Reset index to work with dates and batch_id as columns
     df_reset = df_indexed.reset_index()
@@ -768,6 +781,12 @@ def collect_data_for_user_analysis(
         highest_discount_non_zero_original_price=round(highest_discount_original_price_non_zero, 2),
         total_merch_cost=round(total_merch_cost, 2),
         mean_merch_cost=round(mean_merch_cost, 2),
+        new_artists=len(seen_first_time),
+        seen_before_artists=len(seen_first_time),
+        new_venues=len(venues_visited_first_time),
+        visited_before_venues=len(venues_visited_before),
+        new_cities=len(cities_visited_first_time),
+        visited_before_cities=len(cities_visited_before),
     )
 
 
@@ -785,6 +804,7 @@ def get_festival_row_mask(df_indexed: DataFrame) -> DataFrame:
 
 def high_level_user_analysis(
     df_indexed: DataFrame,
+    before_date_df: DataFrame,
     meta_info: MetaInfo,
     running_order_headline_last: bool,
     user_data_folder: Path,
@@ -798,7 +818,7 @@ def high_level_user_analysis(
     unique_artists = df_indexed[ARTIST].dropna().unique()
 
     user_analysis = collect_data_for_user_analysis(
-        df_indexed, running_order_headline_last, festival_label=festival_label
+        df_indexed, before_date_df, running_order_headline_last, festival_label=festival_label
     )
 
     # USER OVERVIEW
