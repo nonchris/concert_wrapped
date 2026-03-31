@@ -595,6 +595,33 @@ def calculate_highest_discount(
     return highest_discount, band_name, original_price
 
 
+def split_entres_into_commonand_and_unique(
+    primary_df: DataFrame, intersect_df: DataFrame, column: str = ARTIST
+) -> tuple[set, set]:
+    """
+    Splits entries of first df into two sets:
+    Which entries are present in both DFs and which is only in first DF?
+
+    Can be used to e.g. find out "which artists have is seen before and which are new?"
+
+    Args:
+        primary_df: The DF that is analyzed
+        intersect_df: The DF that is the source to check if an entry is also present in it
+        column: Column on which teh analysis shall be based
+
+    Returns:
+        Set of the entries that were in common, set of the entries that were not in common
+    """
+
+    seen_artists_in_period = set(primary_df[column].unique())
+    seen_artists_before_period = set(intersect_df[column].unique())
+
+    seen_before = seen_artists_before_period.intersection(seen_artists_in_period)
+    seen_first_time = seen_artists_in_period - seen_before
+
+    return seen_before, seen_first_time
+
+
 def collect_data_for_user_analysis(
     df_indexed: DataFrame, running_order_headline_last: bool, festival_label: str = "F"
 ) -> UserAnalysis:
