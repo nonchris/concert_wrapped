@@ -563,11 +563,15 @@ def find_most_expensive_ticket(df: DataFrame, key: str) -> tuple[float, str]:
 
 
 def calculate_highest_discount(
-    df_indexed: DataFrame, discounts: pd.Series, column_name: str
+    df_indexed: DataFrame,
+    discounts: pd.Series,
+    column_name: str,
+    account_for_min: bool = False,
 ) -> tuple[float, str, float]:
     """
     Calculate the highest discount from a series, handling negative discounts.
 
+    if account_for_min is enabled:
     Negative discounts mean you got paid to attend. Returns the most extreme value
     (highest positive discount or lowest negative discount).
 
@@ -581,7 +585,7 @@ def calculate_highest_discount(
     highest_discount = discounts.max()
 
     # you could get paid to attend, so we have to account for that xd
-    if (min_discount := discounts.min()) < 0:
+    if account_for_min and (min_discount := discounts.min()) < 0:
         highest_discount = min_discount
         idx = discounts.idxmin()
 
