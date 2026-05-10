@@ -299,7 +299,10 @@ class TopBandContext(PriceAble):
             return "[unknown]"
         prices_np = np.array(prices)
         idx = np.argmax(prices_np) if use_max else np.argmin(prices_np)
-        headline_name = other[idx]
+        try:
+            headline_name = other[idx]
+        except IndexError as e:
+            raise IndexError(f"Can't access index {idx} for {self.name}") from e
         # If the artist name matches the headline, return "headliner"
         if self.name == headline_name:
             return "Headliner"
