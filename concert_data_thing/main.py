@@ -316,7 +316,7 @@ def analyze_concert_csv(
     start_date: dt.datetime,
     end_date: dt.datetime,
     user_name: str,
-    city: str,
+    city: str = "City",
     date: str = "Date",
     date_format: str = "%d.%m.%y",
     sep: str = ",",
