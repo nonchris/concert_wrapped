@@ -7,7 +7,7 @@
    viewBox="0 0 1080 1350"
    version="1.1"
    id="svg1"
-   inkscape:version="1.4.3 (0d15f75, 2025-12-25)"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
    sodipodi:docname="one-artist.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -25,14 +25,14 @@
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="px"
      inkscape:zoom="0.47497675"
-     inkscape:cx="629.50449"
-     inkscape:cy="643.18937"
+     inkscape:cx="629.5045"
+     inkscape:cy="643.18938"
      inkscape:window-width="1319"
      inkscape:window-height="1226"
-     inkscape:window-x="1928"
-     inkscape:window-y="658"
+     inkscape:window-x="985"
+     inkscape:window-y="25"
      inkscape:window-maximized="0"
-     inkscape:current-layer="svg1"
+     inkscape:current-layer="layer2"
      showguides="true"
      showgrid="false">
     <sodipodi:guide
@@ -97,8 +97,8 @@
        inkscape:collect="always"
        xlink:href="#linearGradient3"
        id="linearGradient4"
-       x1="540"
-       y1="0"
+       x1="540.03003"
+       y1="444.65335"
        x2="540"
        y2="1080"
        gradientUnits="userSpaceOnUse"
@@ -133,6 +133,15 @@
          y="1340.6848"
          style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20.3891px;font-family:sans-serif;-inkscape-font-specification:'sans-serif Italic';fill:#000000;fill-opacity:0.381625;stroke-width:1.31765"
          dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4930121">Wrapped tool created by cyber__chris</tspan></text>
+    <rect
+       style="fill:url(#linearGradient4);fill-opacity:1;stroke-width:1.11803"
+       id="rect3"
+       width="1080"
+       height="1350"
+       x="0"
+       y="0"
+       inkscape:label="BACKGROUND"
+       sodipodi:insensitive="true" />
   </g>
   <g
      inkscape:label="HEADER"
