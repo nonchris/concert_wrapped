@@ -345,6 +345,32 @@
             border-radius: 6px;
             margin-top: 20px;
         }
+        .date-range-shortcuts {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .date-shortcut-btn {
+            background-color: var(--color-bg-dark);
+            color: var(--color-text-primary);
+            border: 1px solid var(--color-border);
+            padding: 8px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            width: auto;
+            margin-top: 0;
+        }
+        .date-shortcut-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary);
+            background-color: var(--color-bg-dark);
+        }
+        .date-shortcut-btn:active {
+            background-color: var(--color-bg-medium);
+        }
         .footer {
             text-align: center;
             padding: 20px 0;
@@ -413,6 +439,13 @@
                             <input type="date" id="end_date" name="end_date" required placeholder="End Date">
                             <div class="help-text">End date for analysis</div>
                         </div>
+                    </div>
+                    <div class="date-range-shortcuts">
+                        <button type="button" class="date-shortcut-btn" data-range="current-month">Current month</button>
+                        <button type="button" class="date-shortcut-btn" data-range="current-year">Current year</button>
+                        <button type="button" class="date-shortcut-btn" data-range="last-month">Last month</button>
+                        <button type="button" class="date-shortcut-btn" data-range="last-year">Last year</button>
+                        <button type="button" class="date-shortcut-btn" data-range="until-today">??? - today</button>
                     </div>
                 </div>
                 <div class="form-group">
@@ -604,6 +637,71 @@
             }
 
             console.log("[init] Form found, adding submit listener...");
+
+            function formatDateForInput(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, "0");
+                const day = String(date.getDate()).padStart(2, "0");
+                return `${year}-${month}-${day}`;
+            }
+
+            function getDateRangeForShortcut(range) {
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth();
+
+                switch (range) {
+                    case "current-month":
+                        return {
+                            start: new Date(year, month, 1),
+                            end: new Date(year, month + 1, 0),
+                        };
+                    case "current-year":
+                        return {
+                            start: new Date(year, 0, 1),
+                            end: new Date(year, 11, 31),
+                        };
+                    case "last-month":
+                        return {
+                            start: new Date(year, month - 1, 1),
+                            end: new Date(year, month, 0),
+                        };
+                    case "last-year":
+                        return {
+                            start: new Date(year - 1, 0, 1),
+                            end: new Date(year - 1, 11, 31),
+                        };
+                    default:
+                        return null;
+                }
+            }
+
+            document.querySelectorAll(".date-shortcut-btn").forEach((button) => {
+                button.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    const range = button.getAttribute("data-range");
+                    const startInput = document.getElementById("start_date");
+                    const endInput = document.getElementById("end_date");
+
+                    if (range === "until-today") {
+                        if (endInput) {
+                            endInput.value = formatDateForInput(new Date());
+                        }
+                        return;
+                    }
+
+                    const dates = getDateRangeForShortcut(range);
+                    if (!dates) {
+                        return;
+                    }
+                    if (startInput) {
+                        startInput.value = formatDateForInput(dates.start);
+                    }
+                    if (endInput) {
+                        endInput.value = formatDateForInput(dates.end);
+                    }
+                });
+            });
 
             form.addEventListener("submit", async function(e) {
                 e.preventDefault();
