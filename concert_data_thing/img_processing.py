@@ -277,8 +277,13 @@ class TopBandContext(PriceAble):
     marker_total_festival_cost: ClassVar[str] = "Tfx"
 
     @property
-    def total_headline_cost(self) -> float:
-        return self._total_cost(self._get_prices_for_type(self.TYPE_HEADLINE))
+    def total_headline_cost(self, include_festival_headline: bool = True) -> float:
+        cost = self._total_cost(self._get_prices_for_type(self.TYPE_HEADLINE))
+
+        if include_festival_headline:
+            cost += self._total_cost(self._get_prices_for_type(self.TYPE_FESTIVAL_HEADLINE))
+
+        return cost
 
     @property
     def total_support_cost(self) -> float:
